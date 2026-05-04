@@ -10,7 +10,7 @@ from PySide6.QtCore import (
 
 class HomeView(QWidget):
     mergeClicked = Signal()
-    extractCicked = Signal()
+    extractClicked = Signal()
 
     def __init__(self):
         super().__init__()
@@ -38,7 +38,7 @@ class HomeView(QWidget):
         deleteBtn = QPushButton("Delete")
 
         mergeBtn.clicked.connect(self.mergeClicked.emit)
-        extractBtn.clicked.connect(self.extractCicked.emit)
+        extractBtn.clicked.connect(self.extractClicked.emit)
 
         for btn in [mergeBtn, splitBtn, deleteBtn, extractBtn]:
             btn.setStyleSheet("padding: 10px; min-width: 80px")

@@ -48,7 +48,7 @@ class AppWindow(QMainWindow):
         self.extractBtn.clicked.connect(self.showExtractScreen)
 
         self.homeScreen.mergeClicked.connect(self.showMergeScreen)
-        self.homeScreen.extractCicked.connect(self.showExtractScreen)
+        self.homeScreen.extractClicked.connect(self.showExtractScreen)
 
     def showHomeScreen(self):
         print('home screen')
