@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QSizePolicy
+    QWidget, QVBoxLayout, QPushButton, QLabel, QSizePolicy
 )
 from PySide6.QtCore import (
     Qt, Signal
@@ -13,13 +13,14 @@ from core.chooseFileDialog import chooseFile
 class ChooseFileWidget(QWidget):
     fileSelected = Signal(list)
 
+    # receives the title and subtitle of the current screen
     def __init__(self, title, subtitle):
         super().__init__()
 
-        self.title = title.lower()
-
+        # vertically aligned layout
         cfLayout = QVBoxLayout(self)
 
+        # font, label and button size settings
         titleFont = QFont()
         titleFont.setPixelSize(30)
 
@@ -42,8 +43,8 @@ class ChooseFileWidget(QWidget):
         self.chooseBtn.setMinimumSize(300, 100)
         self.chooseBtn.setMaximumWidth(500)
         
-        
-        
+
+        # add title, subtitle and choose file button to the layout
         cfLayout.addStretch()
         cfLayout.addWidget(titleLabel)
         cfLayout.addSpacing(10)
@@ -52,10 +53,11 @@ class ChooseFileWidget(QWidget):
         cfLayout.addWidget(self.chooseBtn, alignment=Qt.AlignCenter)
         cfLayout.addStretch()
 
-        self.chooseBtn.clicked.connect(self.searchFile)
+        # connect the button to the choose file function
+        self.chooseBtn.clicked.connect(lambda: self.searchFile(title))
 
-    def searchFile(self):
-        if self.title == 'merge':
+    def searchFile(self, title):
+        if title == 'merge':
             filepaths = chooseFile(self, 'multiple')
 
         else:

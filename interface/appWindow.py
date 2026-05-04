@@ -16,40 +16,52 @@ class AppWindow(QMainWindow):
 
         mainLayout = QHBoxLayout(centralWidget)
 
+        # Sidebar configuration
         self.sidebar = QWidget()    
         self.sidebar.setFixedWidth(200)
 
         menuLayout = QVBoxLayout(self.sidebar)
         menuLayout.setContentsMargins(0, 10, 0, 0)
 
+        # Routes buttons
         self.homeBtn = QPushButton('Home')
         self.mergeBtn = QPushButton('Merge PDFs')
+        self.splitBtn = QPushButton('Split PDFs')
         self.extractBtn = QPushButton('Extract Pages')
+        self.deleteBtn = QPushButton('Delete Pages')
 
         menuLayout.addWidget(self.homeBtn)
         menuLayout.addSpacing(50)
         menuLayout.addWidget(self.mergeBtn)
+        menuLayout.addWidget(self.splitBtn)
         menuLayout.addWidget(self.extractBtn)
+        menuLayout.addWidget(self.deleteBtn)
         menuLayout.addStretch()
 
+        # Add stack with the all screens
         self.stackWidget = QStackedWidget()
 
+        # Screens of the processes
         self.homeScreen = HomeView()
         self.mergeScreen = QWidget()
 
+        # Add screens to the stack
         self.stackWidget.addWidget(self.homeScreen)
         self.stackWidget.addWidget(self.mergeScreen)
 
         mainLayout.addWidget(self.sidebar)
         mainLayout.addWidget(self.stackWidget)
 
+        # Listener to all buttons
         self.homeBtn.clicked.connect(self.showHomeScreen)
         self.mergeBtn.clicked.connect(self.showMergeScreen)
         self.extractBtn.clicked.connect(self.showExtractScreen)
 
+        # Homescreen buttons listeners
         self.homeScreen.mergeClicked.connect(self.showMergeScreen)
         self.homeScreen.extractClicked.connect(self.showExtractScreen)
 
+    # ==== Buttons Functions ====
     def showHomeScreen(self):
         print('home screen')
         self.stackWidget.setCurrentIndex(0)

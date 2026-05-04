@@ -10,11 +10,14 @@ from PySide6.QtCore import (
 
 class HomeView(QWidget):
     mergeClicked = Signal()
+    splitClicked = Signal()
     extractClicked = Signal()
+    deleteClicked = Signal()
 
     def __init__(self):
         super().__init__()
 
+        # creating a layout alingn vertically
         layout = QVBoxLayout(self)
         layout.setSpacing(5)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -31,18 +34,21 @@ class HomeView(QWidget):
         buttonLayout = QHBoxLayout(buttonContainer)
         buttonLayout.setSpacing(5)
 
-
+        # creating process buttons
         mergeBtn = QPushButton("Merge")
         splitBtn = QPushButton("Split")
         extractBtn = QPushButton("Extract")
         deleteBtn = QPushButton("Delete")
 
         mergeBtn.clicked.connect(self.mergeClicked.emit)
+        splitBtn.clicked.connect(self.splitClicked.emit)
         extractBtn.clicked.connect(self.extractClicked.emit)
+        deleteBtn.clicked.connect(self.deleteClicked.emit)
 
         for btn in [mergeBtn, splitBtn, deleteBtn, extractBtn]:
             btn.setStyleSheet("padding: 10px; min-width: 80px")
 
+        # add buttons in the button layout
         buttonLayout.addWidget(mergeBtn)
         buttonLayout.addWidget(splitBtn)
         buttonLayout.addWidget(extractBtn)
