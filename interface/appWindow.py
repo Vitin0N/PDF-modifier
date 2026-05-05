@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
 )
 
 from views.homeScreen import HomeView
+from views.mergeScreen import MergeScreen
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -43,7 +44,7 @@ class AppWindow(QMainWindow):
 
         # Screens of the processes
         self.homeScreen = HomeView()
-        self.mergeScreen = QWidget()
+        self.mergeScreen = MergeScreen()
 
         # Add screens to the stack
         self.stackWidget.addWidget(self.homeScreen)

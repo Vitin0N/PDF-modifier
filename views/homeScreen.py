@@ -9,6 +9,7 @@ from PySide6.QtCore import (
 )
 
 class HomeView(QWidget):
+    # creating signals for buttons
     mergeClicked = Signal()
     splitClicked = Signal()
     extractClicked = Signal()

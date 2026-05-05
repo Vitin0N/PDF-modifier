@@ -57,7 +57,7 @@ class ChooseFileWidget(QWidget):
         self.chooseBtn.clicked.connect(lambda: self.searchFile(title))
 
     def searchFile(self, title):
-        if title == 'merge':
+        if 'merge' in title.lower():
             filepaths = chooseFile(self, 'multiple')
 
         else:
