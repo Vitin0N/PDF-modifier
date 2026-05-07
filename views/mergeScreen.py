@@ -1,18 +1,21 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
-    QGridLayout, QScrollArea
+    QGridLayout, QScrollArea, QGraphicsBlurEffect
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 import os
 
-from interface.fileCard import FileCards
+from components.fileCard import FileCards
 from components._chooseFileScreen import ChooseFileWidget
 from core.chooseFileDialog import chooseFile
+from components.loadingDialog import LoadingDialog
+from core.mergeWorker import MergeWorker
 
 class MergeScreen(QWidget):
     def __init__(self):
         super().__init__()
+
 
         self.cards = []
 
@@ -31,9 +34,12 @@ class MergeScreen(QWidget):
         self.settingStep = QWidget()
         mainSettingLayout = QHBoxLayout(self.settingStep)
 
+        # loading setting
+        self.loadingProcess = LoadingDialog(self.settingStep)
+        
         # main content
-        mainSide = QWidget()
-        mainSideLayout = QVBoxLayout(mainSide)
+        self.mainSide = QWidget()
+        mainSideLayout = QVBoxLayout(self.mainSide)
 
         # helper buttons
         topButtons = QHBoxLayout()
@@ -86,8 +92,8 @@ class MergeScreen(QWidget):
         mainSideLayout.addWidget(self.fileScrollArea)
 
         # Settings side
-        settingSide = QWidget()
-        settingLayout = QVBoxLayout(settingSide)
+        self.settingSide = QWidget()
+        settingLayout = QVBoxLayout(self.settingSide)
 
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
@@ -174,8 +180,8 @@ class MergeScreen(QWidget):
         settingLayout.addSpacing(20)
 
         # add to main layout
-        mainSettingLayout.addWidget(mainSide, 2)      # Bigger
-        mainSettingLayout.addWidget(settingSide, 1)   # Smaller
+        mainSettingLayout.addWidget(self.mainSide, 2)      # Bigger
+        mainSettingLayout.addWidget(self.settingSide, 1)   # Smaller
 
         # add screen to stack
         self.innerStack.addWidget(self.selectFileStep)
@@ -280,6 +286,22 @@ class MergeScreen(QWidget):
         super().resizeEvent(event)
 
         self.updateCurrentGrid()
+        
+        self.loadingProcess.resize(self.settingStep.size())
+
+    def changeMergeBtnState(self, block: bool):
+        self.mergeBtn.setProperty('blocked', block)
+        
+        if block:
+            self.mergeBtn.setCursor(Qt.ForbiddenCursor)
+            self.canMerge = False
+        else:
+            self.mergeBtn.setCursor(Qt.PointingHandCursor)
+            self.canMerge = True
+
+        # remove the currente style and add it again
+        self.mergeBtn.style().unpolish(self.mergeBtn)
+        self.mergeBtn.style().polish(self.mergeBtn) 
 
     def updateMergeBtnState(self):
         hasEnoughFiles = len(self.selectedFile) >= 2
@@ -287,24 +309,61 @@ class MergeScreen(QWidget):
         self.canMerge = hasEnoughFiles
 
         if hasEnoughFiles:
-            self.mergeBtn.setCursor(Qt.PointingHandCursor)
 
-            self.mergeBtn.setProperty('blocked', False)
+            self.changeMergeBtnState(False)
 
             self.canMergeContainer.hide()
         else:
             self.canMergeContainer.show()
 
-            self.mergeBtn.setProperty('blocked', True)
+            self.changeMergeBtnState(True)
             
-            self.mergeBtn.setCursor(Qt.ForbiddenCursor)
-
-        # remove the currente style and add it again
-        self.mergeBtn.style().unpolish(self.mergeBtn)
-        self.mergeBtn.style().polish(self.mergeBtn) 
-    
     def mergePdfs(self):
         if not self.canMerge:
             return
         
-        print('processing...')
+        # block the button on the processing
+        self.changeMergeBtnState(True)
+
+        # set blur effect
+        self.mainBlur = QGraphicsBlurEffect()
+        self.mainBlur.setBlurRadius(8)
+        self.mainSide.setGraphicsEffect(self.mainBlur)
+
+        self.settingBlur = QGraphicsBlurEffect()
+        self.settingBlur.setBlurRadius(8)
+        self.settingSide.setGraphicsEffect(self.settingBlur)
+
+        # TODO processing merge PDF
+
+        self.loadingProcess.showOverlay('Merging PDFs...', mode='progress')
+
+        self.worker = MergeWorker(self.selectedFile)
+
+        self.worker.progress.connect(
+            self.loadingProcess.updateProgress
+        )
+
+        self.worker.finished.connect(
+            self.finishMerge
+        )
+
+        self.worker.start()
+
+
+    def finishMerge(self):  
+
+        # remove blur effect
+        self.mainSide.setGraphicsEffect(None)
+        self.settingSide.setGraphicsEffect(None)
+
+        self.loadingProcess.progressBar.setValue(0)
+
+        self.loadingProcess.hideOverlay()
+
+        self.changeMergeBtnState(False)
+
+        print('Terminou')
+
+        self.resetScreen()
+        
