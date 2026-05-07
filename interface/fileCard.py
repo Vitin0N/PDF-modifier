@@ -2,14 +2,22 @@ from PySide6.QtWidgets import (
     QWidget,
     QLabel,
     QVBoxLayout,
-    QFrame
+    QFrame,
+    QSizePolicy
 )
+from PySide6.QtGui import QFont 
 
 from PySide6.QtCore import Qt
 
 class FileCards(QFrame):
     def __init__(self, filename):
         super().__init__()
+
+        # fix the size of the card
+        self.setSizePolicy(
+            QSizePolicy.Fixed,
+            QSizePolicy.Fixed
+        )
 
         # card format
         self.setFrameShape(QFrame.StyledPanel)
@@ -20,6 +28,12 @@ class FileCards(QFrame):
 
         # file icon
         icon = QLabel('📄')
+
+        # size of icon
+        iconFont = QFont()
+        iconFont.setPixelSize(60)
+        icon.setFont(iconFont)
+
         icon.setAlignment(Qt.AlignCenter)
 
         # file name

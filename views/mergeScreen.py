@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
-    QGridLayout
+    QGridLayout, QScrollArea
 )
 from PySide6.QtCore import Qt
 import os
@@ -45,6 +45,11 @@ class MergeScreen(QWidget):
 
         mainSideLayout.addLayout(topButtons)
 
+        # scroll area for files
+        self.fileScrollArea = QScrollArea()
+        self.fileScrollArea.setWidgetResizable(True)
+
+
         # grid with the file icons
         self.fileFrame = QFrame()
         self.fileFrame.setFrameStyle(QFrame.StyledPanel)
@@ -52,7 +57,9 @@ class MergeScreen(QWidget):
         self.fileLayout = QGridLayout(self.fileFrame)
         self.fileLayout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
 
-        mainSideLayout.addWidget(self.fileFrame)
+        self.fileScrollArea.setWidget(self.fileFrame)
+
+        mainSideLayout.addWidget(self.fileScrollArea)
 
         # Settings side
         settingSide = QWidget()
@@ -108,7 +115,7 @@ class MergeScreen(QWidget):
             self.cards.append(card)
 
     def updateCurrentGrid(self):
-        width = self.fileFrame.width()
+        width = self.fileScrollArea.viewport().width()
 
         cardWidth = 140
 
