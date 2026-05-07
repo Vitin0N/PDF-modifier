@@ -8,6 +8,7 @@ import os
 
 from interface.fileCard import FileCards
 from components._chooseFileScreen import ChooseFileWidget
+from core.chooseFileDialog import chooseFile
 
 class MergeScreen(QWidget):
     def __init__(self):
@@ -125,6 +126,7 @@ class MergeScreen(QWidget):
 
         # buttons commands
         self.backBtn.clicked.connect(self.backChoosingFile)
+        self.addFilesBtn.clicked.connect(self.addFiles)
 
     def continueToMergeScreen(self, filepaths):
         self.selectedFile = filepaths
@@ -136,11 +138,14 @@ class MergeScreen(QWidget):
         self.innerStack.setCurrentIndex(1)
 
     def backChoosingFile(self):
+        self.selectedFile.clear()
+        self.clearCards()
+
         self.innerStack.setCurrentIndex(0)
 
     # helper functions
     def createFileCard(self, filepaths):
-        self.cards.clear()
+        self.clearCards()
 
         for file in filepaths:
             filepath = file
@@ -152,7 +157,19 @@ class MergeScreen(QWidget):
 
             self.cards.append(card)
 
+    def addFiles(self):
+        newFilepaths = chooseFile(self, 'multiple')
+
+        self.selectedFile += newFilepaths
+
+        self.createFileCard(self.selectedFile)
+
+        self.updateCurrentGrid()
+
     def removeCard(self, card):
+        '''
+        Remove the card when clicked on delete file button
+        '''
         self.cards.remove(card)
         
         self.selectedFile.remove(card.filepath)
@@ -160,6 +177,13 @@ class MergeScreen(QWidget):
         card.deleteLater()
 
         self.updateCurrentGrid()
+    
+    def clearCards(self):
+        for card in self.cards:
+            self.fileLayout.removeWidget(card)
+            card.deleteLater()
+
+        self.cards.clear()
 
     def updateCurrentGrid(self):
         width = self.fileScrollArea.viewport().width()
