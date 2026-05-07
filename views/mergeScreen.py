@@ -91,7 +91,7 @@ class MergeScreen(QWidget):
             QFrame {
                 background-color: #def2ff;
                 border-radius: 10px;
-                padding: 10px;
+                padding: 0px 5px;
             }
         ''')
 
@@ -143,12 +143,23 @@ class MergeScreen(QWidget):
         self.cards.clear()
 
         for file in filepaths:
+            filepath = file
             filename = os.path.basename(file)
             filename = filename[:15] + '...' if len(filename) > 15 else filename
 
-            card = FileCards(filename)
+            card = FileCards(filename, filepath)
+            card.removeRequest.connect(self.removeCard)
 
             self.cards.append(card)
+
+    def removeCard(self, card):
+        self.cards.remove(card)
+        
+        self.selectedFile.remove(card.filepath)
+
+        card.deleteLater()
+
+        self.updateCurrentGrid()
 
     def updateCurrentGrid(self):
         width = self.fileScrollArea.viewport().width()

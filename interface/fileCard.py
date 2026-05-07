@@ -3,16 +3,21 @@ from PySide6.QtWidgets import (
     QLabel,
     QVBoxLayout,
     QFrame,
-    QSizePolicy
+    QSizePolicy,
+    QPushButton,
+    QHBoxLayout
 )
 from PySide6.QtGui import QFont 
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 class FileCards(QFrame):
-    def __init__(self, filename):
+    removeRequest = Signal(object)
+    def __init__(self, filename, filepath):
         super().__init__()
 
+        # var to filepath
+        self.filepath = filepath
         # keep the cursor pointing when over the card
         self.setCursor(Qt.PointingHandCursor)
 
@@ -53,8 +58,47 @@ class FileCards(QFrame):
         name = QLabel(filename)
         name.setAlignment(Qt.AlignCenter)
 
+        # set the background color transparent on hover
+        icon.setAttribute(Qt.WA_TransparentForMouseEvents)
+        name.setAttribute(Qt.WA_TransparentForMouseEvents)
+
+        # remove button
+        self.removeBtn = QPushButton("✕", self)
+        self.removeBtn.setFixedSize(28, 28)
+        self.removeBtn.setStyleSheet('''
+            QPushButton {
+                background-color: transparent;
+                border: none;
+                border-radius: 14px;
+                font-weight: bold;
+            }
+                                     
+            QPushButton:hover {
+                background-color: white;
+                color: #e5322d;
+            }
+        ''')
+        self.removeBtn.move(104, 8)
+        self.removeBtn.raise_()
+        self.removeBtn.hide()
+
         # add icon and name to layout
         cardLayout.addStretch()
         cardLayout.addWidget(icon)
         cardLayout.addWidget(name)
         cardLayout.addStretch()
+
+        # buttons commands 
+        self.removeBtn.clicked.connect(self.handleRemove)
+
+    def enterEvent(self, event):
+        self.removeBtn.show()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.removeBtn.hide()
+        super().leaveEvent(event)
+
+    # Command functions
+    def handleRemove(self):
+        self.removeRequest.emit(self)

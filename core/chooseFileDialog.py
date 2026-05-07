@@ -19,6 +19,4 @@ def chooseFile(parent, mode='single'):
         )
     
     if filename:
-        print(filename)
-
         return filename
