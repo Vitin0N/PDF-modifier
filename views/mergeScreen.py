@@ -39,7 +39,29 @@ class MergeScreen(QWidget):
         topButtons = QHBoxLayout()
 
         self.backBtn = QPushButton('Back')
+
+        # Add file settings
+        addFileBtnFont = QFont()
+        addFileBtnFont.setPixelSize(12)
+        addFileBtnFont.setBold(True)
+
         self.addFilesBtn = QPushButton('+')
+        self.addFilesBtn.setFixedSize(24, 24)
+        self.addFilesBtn.setCursor(Qt.PointingHandCursor)
+        self.addFilesBtn.setFont(addFileBtnFont)
+        self.addFilesBtn.setStyleSheet('''
+            QPushButton {
+                border: none;
+                border-radius: 9px;
+                background-color: #e5322d;
+                color: white;
+                text-align: center;
+            }
+                                       
+            QPushButton:hover {
+                background-color: #c92a25;
+            }
+        ''')
 
         topButtons.addWidget(self.backBtn)
         topButtons.addStretch()
@@ -67,6 +89,10 @@ class MergeScreen(QWidget):
         settingSide = QWidget()
         settingLayout = QVBoxLayout(settingSide)
 
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+
         # text style for merge button
         mergeBtnFont = QFont()
         mergeBtnFont.setPixelSize(30)
@@ -74,7 +100,24 @@ class MergeScreen(QWidget):
 
         self.mergeBtn = QPushButton("Merge PDFs")
         self.mergeBtn.setFont(mergeBtnFont)
-        self.mergeBtn.setStyleSheet('background-color: #e5322d;')
+        self.mergeBtn.setStyleSheet('''
+            QPushButton {
+                background-color: #e5322d;
+                color: white;
+                border: none;
+                border-radius: 10px;  
+                padding: 10px;
+            }
+                                    
+            QPushButton[blocked="true"] {
+                background-color: #731916;
+                color: #eeeeee;
+            }
+                                    
+            QPushButton[blocked="false"]:hover {
+                background-color: #c92a25;
+            }
+        ''')
         self.mergeBtn.setMinimumHeight(80)
 
         nameFont = QFont()
@@ -106,10 +149,29 @@ class MergeScreen(QWidget):
 
         infoLayout.addWidget(infoText)
 
+        # info text for when don't have enough files
+        self.canMergeContainer = QFrame()
+        canMergeLayout = QVBoxLayout(self.canMergeContainer)
+
+        canMergeFont = QFont()
+        canMergeFont.setBold(True)
+        canMergeFont.setPixelSize(10)
+
+        canMergeText = QLabel('You can only merge if there is more than one PDF file.')
+        canMergeText.setFont(canMergeFont)
+        canMergeText.setAlignment(Qt.AlignCenter)
+        canMergeText.setWordWrap(True)
+
+        canMergeLayout.addWidget(canMergeText)
+        self.canMergeContainer.hide()
+
+        # add elements in setting layout
         settingLayout.addWidget(name)
         settingLayout.addSpacing(10)
+        settingLayout.addWidget(line)
         settingLayout.addWidget(infoContainer)
         settingLayout.addStretch()
+        settingLayout.addWidget(self.canMergeContainer)
         settingLayout.addWidget(self.mergeBtn)
         settingLayout.addSpacing(10)
 
@@ -127,10 +189,12 @@ class MergeScreen(QWidget):
         # buttons commands
         self.backBtn.clicked.connect(self.backChoosingFile)
         self.addFilesBtn.clicked.connect(self.addFiles)
+        self.mergeBtn.clicked.connect(self.mergePdfs)
 
     def continueToMergeScreen(self, filepaths):
         self.selectedFile = filepaths
 
+        self.updateMergeBtnState()
         self.createFileCard(filepaths)
 
         QTimer.singleShot(0, self.updateCurrentGrid)
@@ -163,6 +227,7 @@ class MergeScreen(QWidget):
         self.selectedFile += newFilepaths
 
         self.createFileCard(self.selectedFile)
+        self.updateMergeBtnState()
 
         self.updateCurrentGrid()
 
@@ -173,6 +238,7 @@ class MergeScreen(QWidget):
         self.cards.remove(card)
         
         self.selectedFile.remove(card.filepath)
+        self.updateMergeBtnState()
 
         card.deleteLater()
 
@@ -207,3 +273,31 @@ class MergeScreen(QWidget):
         super().resizeEvent(event)
 
         self.updateCurrentGrid()
+
+    def updateMergeBtnState(self):
+        hasEnoughFiles = len(self.selectedFile) >= 2
+
+        self.canMerge = hasEnoughFiles
+
+        if hasEnoughFiles:
+            self.mergeBtn.setCursor(Qt.PointingHandCursor)
+
+            self.mergeBtn.setProperty('blocked', False)
+
+            self.canMergeContainer.hide()
+        else:
+            self.canMergeContainer.show()
+
+            self.mergeBtn.setProperty('blocked', True)
+            
+            self.mergeBtn.setCursor(Qt.ForbiddenCursor)
+
+        # remove the currente style and add it again
+        self.mergeBtn.style().unpolish(self.mergeBtn)
+        self.mergeBtn.style().polish(self.mergeBtn) 
+    
+    def mergePdfs(self):
+        if not self.canMerge:
+            return
+        
+        print('processing...')
