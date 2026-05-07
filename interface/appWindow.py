@@ -69,6 +69,8 @@ class AppWindow(QMainWindow):
 
     def showMergeScreen(self):
         print('merge srcreen')
+        self.mergeScreen.resetScreen()
+        
         self.stackWidget.setCurrentIndex(1)
     
     def showExtractScreen(self):

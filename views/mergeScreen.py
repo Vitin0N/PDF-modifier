@@ -109,14 +109,14 @@ class MergeScreen(QWidget):
                 padding: 10px;
             }
                                     
-            QPushButton[blocked="true"] {
-                background-color: #731916;
-                color: #eeeeee;
-            }
-                                    
             QPushButton[blocked="false"]:hover {
                 background-color: #c92a25;
             }
+                                    
+            QPushButton[blocked="true"] {
+                background-color: #731916;
+                color: #eeeeee;
+            }                      
         ''')
         self.mergeBtn.setMinimumHeight(80)
 
@@ -142,9 +142,7 @@ class MergeScreen(QWidget):
         infoText = QLabel('ℹ️ The merge order will be the order thats appears on the screen, ' \
                             'so the PDFs will me merged based on the order in which you selected them.')
         infoText.setAlignment(Qt.AlignCenter)
-        infoText.setStyleSheet('''
-            color: black;
-        ''')
+        infoText.setStyleSheet('''color: black;''')
         infoText.setWordWrap(True)
 
         infoLayout.addWidget(infoText)
@@ -173,7 +171,7 @@ class MergeScreen(QWidget):
         settingLayout.addStretch()
         settingLayout.addWidget(self.canMergeContainer)
         settingLayout.addWidget(self.mergeBtn)
-        settingLayout.addSpacing(10)
+        settingLayout.addSpacing(20)
 
         # add to main layout
         mainSettingLayout.addWidget(mainSide, 2)      # Bigger
@@ -205,6 +203,15 @@ class MergeScreen(QWidget):
         self.selectedFile.clear()
         self.clearCards()
 
+        self.innerStack.setCurrentIndex(0)
+
+    def resetScreen(self):
+        '''
+        Reset all main parameters and return to the file selection screen
+        '''
+        self.selectedFile.clear()
+        self.clearCards()
+        self.updateMergeBtnState()
         self.innerStack.setCurrentIndex(0)
 
     # helper functions
