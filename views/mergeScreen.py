@@ -2,7 +2,8 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
     QGridLayout, QScrollArea
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QFont
 import os
 
 from interface.fileCard import FileCards
@@ -65,19 +66,54 @@ class MergeScreen(QWidget):
         settingSide = QWidget()
         settingLayout = QVBoxLayout(settingSide)
 
-        self.mergeBtn = QPushButton("Merge")
-        self.mergeBtn.setMinimumHeight(60)
-        
-        nome = QLabel('teste de que esta indo para o lugar')
-        nome.setWordWrap(True)
-        nome.setAlignment(Qt.AlignTop)
+        # text style for merge button
+        mergeBtnFont = QFont()
+        mergeBtnFont.setPixelSize(30)
+        mergeBtnFont.setBold(True)
 
-        settingLayout.addWidget(nome)
+        self.mergeBtn = QPushButton("Merge PDFs")
+        self.mergeBtn.setFont(mergeBtnFont)
+        self.mergeBtn.setStyleSheet('background-color: #e5322d;')
+        self.mergeBtn.setMinimumHeight(80)
+
+        nameFont = QFont()
+        nameFont.setPixelSize(30)
+        nameFont.setBold(True)
+        
+        name = QLabel(f'MERGE')
+        
+        name.setFont(nameFont)
+        name.setAlignment(Qt.AlignTop | Qt.AlignCenter)
+
+        infoContainer = QFrame()
+        infoLayout = QVBoxLayout(infoContainer)
+        infoContainer.setStyleSheet('''
+            QFrame {
+                background-color: #def2ff;
+                border-radius: 10px;
+                padding: 10px;
+            }
+        ''')
+
+        infoText = QLabel('ℹ️ The merge order will be the order thats appears on the screen, ' \
+                            'so the PDFs will me merged based on the order in which you selected them.')
+        infoText.setAlignment(Qt.AlignCenter)
+        infoText.setStyleSheet('''
+            color: black;
+        ''')
+        infoText.setWordWrap(True)
+
+        infoLayout.addWidget(infoText)
+
+        settingLayout.addWidget(name)
+        settingLayout.addSpacing(10)
+        settingLayout.addWidget(infoContainer)
         settingLayout.addStretch()
         settingLayout.addWidget(self.mergeBtn)
+        settingLayout.addSpacing(10)
 
         # add to main layout
-        mainSettingLayout.addWidget(mainSide, 3)      # Bigger
+        mainSettingLayout.addWidget(mainSide, 2)      # Bigger
         mainSettingLayout.addWidget(settingSide, 1)   # Smaller
 
         # add screen to stack
@@ -95,7 +131,7 @@ class MergeScreen(QWidget):
 
         self.createFileCard(filepaths)
 
-        self.updateCurrentGrid()
+        QTimer.singleShot(0, self.updateCurrentGrid)
 
         self.innerStack.setCurrentIndex(1)
 
