@@ -13,6 +13,9 @@ class FileCards(QFrame):
     def __init__(self, filename):
         super().__init__()
 
+        # keep the cursor pointing when over the card
+        self.setCursor(Qt.PointingHandCursor)
+
         # fix the size of the card
         self.setSizePolicy(
             QSizePolicy.Fixed,
@@ -22,6 +25,16 @@ class FileCards(QFrame):
         # card format
         self.setFrameShape(QFrame.StyledPanel)
         self.setFixedSize(140, 140)
+        
+        self.setStyleSheet('''
+            QFrame {
+                border-radius: 10px;
+            }
+
+            QFrame:hover {
+                background-color: #e5322d;  
+            }
+        ''')
 
         # card layout
         cardLayout = QVBoxLayout(self)
