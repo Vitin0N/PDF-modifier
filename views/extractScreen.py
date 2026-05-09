@@ -119,13 +119,13 @@ class ExtractScreen(QWidget):
 
         optionTabLayout = QHBoxLayout()
 
-        allPagesBtn = QPushButton('Extract all pages')
-        allPagesBtn.setCheckable(True)
-        allPagesBtn.setCursor(Qt.PointingHandCursor)
-        allPagesBtn.setMinimumHeight(50)
-        allPagesBtn.setChecked(True)
+        self.allPagesBtn = QPushButton('Extract all pages')
+        self.allPagesBtn.setCheckable(True)
+        self.allPagesBtn.setCursor(Qt.PointingHandCursor)
+        self.allPagesBtn.setMinimumHeight(50)
+        self.allPagesBtn.setChecked(True)
 
-        allPagesBtn.clicked.connect(self.selectAllPages)
+        self.allPagesBtn.clicked.connect(self.selectAllPages)
 
         selectPageBtn = QPushButton('Select pages')
         selectPageBtn.setCheckable(True)
@@ -136,7 +136,7 @@ class ExtractScreen(QWidget):
 
         optionGroup = QButtonGroup(self)
         optionGroup.setExclusive(True)
-        optionGroup.addButton(allPagesBtn)
+        optionGroup.addButton(self.allPagesBtn)
         optionGroup.addButton(selectPageBtn)
 
         style = '''
@@ -164,10 +164,10 @@ class ExtractScreen(QWidget):
             }
         '''
 
-        allPagesBtn.setStyleSheet(style)
+        self.allPagesBtn.setStyleSheet(style)
         selectPageBtn.setStyleSheet(style)
 
-        optionTabLayout.addWidget(allPagesBtn)
+        optionTabLayout.addWidget(self.allPagesBtn)
         optionTabLayout.addWidget(selectPageBtn)
 
         # option info text
@@ -215,6 +215,8 @@ class ExtractScreen(QWidget):
         self.pageInput.setPlaceholderText('Example: 1-5,8-10')
         self.pageInput.setMinimumHeight(35)
 
+        self.pageInput.textChanged.connect(self.selectPages)
+
         # extract to one pdf chebok
         self.extractToOne = QCheckBox('Merge extract pages into one PDF!')
 
@@ -250,7 +252,7 @@ class ExtractScreen(QWidget):
         self.settingStack.addWidget(allPagesInfo)
         self.settingStack.addWidget(selectPageInfo)
 
-        allPagesBtn.clicked.connect(
+        self.allPagesBtn.clicked.connect(
             lambda: self.settingStack.setCurrentIndex(0)
         )
         
@@ -304,6 +306,7 @@ class ExtractScreen(QWidget):
         self.selectFile = ''
         self.filepath = ''
         self.clearPages()
+        self.allPagesBtn.setChecked(True)
         self.innerStack.setCurrentIndex(0)
 
     def addPageCard(self, pageIndex, qimage):
@@ -393,6 +396,39 @@ class ExtractScreen(QWidget):
         for card in self.pages:
             card.setSelected(card.pageIndex in self.selectedPages)
 
+    def selectPages(self, text):
+        if not text.strip():
+            self.selectedPages.clear()
+
+            for card in self.pages:
+                card.setSelected(False)
+
+            return
+        
+        self.selectedPages.clear()
+
+
+        for card in self.pages:
+            card.setSelected(False)
+        try:
+            textList = text.split(',')
+            for elem in textList:
+                elem = elem.strip()
+                if '-' in elem:
+                    start, end = elem.split('-')
+
+                    for i in range(int(start), int(end)+1):
+                        self.selectedPages.add(i-1)
+
+                else:
+                    self.selectedPages.add(int(elem)-1)
+
+            for card in self.pages:
+                card.setSelected(card.pageIndex in self.selectedPages)
+        except:
+            pass
+
+
     def updateCurrentGrid(self):
         if not self.pages:
             return
@@ -428,7 +464,6 @@ class ExtractScreen(QWidget):
             if card.pageIndex == index:
                 oldIndex = i
                 break
-
 
         if oldIndex == newIndex or oldIndex == -1:
             return

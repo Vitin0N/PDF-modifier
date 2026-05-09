@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QFrame, QVBoxLayout, QLabel, QSizePolicy
+from PySide6.QtWidgets import QFrame, QVBoxLayout, QLabel, QSizePolicy, QApplication
 from PySide6.QtGui import QDrag, QFont
 from PySide6.QtCore import Qt, Signal, QMimeData
 import fitz  # Importando o PyMuPDF
@@ -11,6 +11,7 @@ class PageCard(QFrame):
 
         self.pageIndex = pageIndex
         self.selected = False
+        self.startPos = None
 
         self.setCursor(Qt.PointingHandCursor)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -78,7 +79,10 @@ class PageCard(QFrame):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            self.startPos = event.pos()
+
             self.clicked.emit(self.pageIndex)
+
         super().mousePressEvent(event)
 
     def resizeEvent(self, event):
@@ -91,6 +95,14 @@ class PageCard(QFrame):
 
     def mouseMoveEvent(self, event):
         if not (event.buttons() & Qt.LeftButton):
+            return
+        
+        if not self.startPos:
+            return
+        
+        distance = (event.pos() - self.startPos).manhattanLength()
+
+        if distance < QApplication.startDragDistance():
             return
         
         drag = QDrag(self)
