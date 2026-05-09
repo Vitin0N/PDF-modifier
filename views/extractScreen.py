@@ -3,17 +3,24 @@ from PySide6.QtWidgets import (
     QGridLayout, QScrollArea, QGraphicsBlurEffect, QButtonGroup, QLineEdit, QCheckBox
 )
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QPixmap
 
 from components._chooseFileScreen import ChooseFileWidget
 from components.loadingDialog import LoadingDialog
 from components.dropGridFrame import DrogGridFrame
+from components.pageCard import PageCard
+from core.thumbWorker import ThumbWorker
 
 
 class ExtractScreen(QWidget):
     def __init__(self):
         super().__init__()
 
+        # initial var
+        self.selectFile = ''
+        self.pages = []
+
+        # screen construction
         mainLayout = QVBoxLayout(self)
         self.innerStack = QStackedWidget()
         mainLayout.addWidget(self.innerStack)
@@ -24,7 +31,7 @@ class ExtractScreen(QWidget):
             'Separate one or a set of pages that can become one or more PDFs!'
         )
 
-        # self.selectFileStep.fileSelected.connect(...) # TODO make the function
+        self.selectFileStep.fileSelected.connect(self.continueToExtractScreen)
 
         # setting and complete process screen
         self.settingStep = QWidget()
@@ -56,6 +63,8 @@ class ExtractScreen(QWidget):
 
         self.pageLayout = QGridLayout()
         self.pageLayout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+
+        self.pagesFrame.setLayout(self.pageLayout)
 
         self.filePageFrame.setWidget(self.pagesFrame)
 
@@ -260,9 +269,66 @@ class ExtractScreen(QWidget):
         mainSettingLayout.addWidget(self.settingSide, 1)
 
         # add screen to stack
-        self.innerStack.addWidget(self.settingStep)
         self.innerStack.addWidget(self.selectFileStep)
+        self.innerStack.addWidget(self.settingStep)
 
+    def continueToExtractScreen(self, filepath):
+        self.loading.showOverlay('', mode='spin')
+
+        self.innerStack.setCurrentIndex(1)
+        QTimer.singleShot(
+            0,
+            lambda: self.loadExtractScreen(filepath)
+        )
+
+    def loadExtractScreen(self, filepath):
+        self.selectFile = filepath
+
+        # TODO criar as paginas e fazer o updategrid
+        self.clearPages()
+        self.filepath = "".join(filepath)
+
+        self.thumbWoker = ThumbWorker(self.filepath)
+        self.thumbWoker.pageRendered.connect(self.addPageCard)
+        self.thumbWoker.finished.connect(self.loading.hideOverlay)
+
+        self.thumbWoker.start()
+
+    def addPageCard(self, pageIndex, qimage):
+        pixmap = QPixmap.fromImage(qimage)
+        card = PageCard(pageIndex, pixmap)
+
+        self.pages.append(card)
+
+        self.updateCurrentGrid()
+
+    def updateCurrentGrid(self):
+        if not self.pages:
+            return
+        
+        width = self.filePageFrame.viewport().width()
+        cardWidth = 170
+
+        collunms = max(1, width // cardWidth)
+
+        while self.pageLayout.count():
+            item = self.pageLayout.takeAt(0)
+
+        for index, card in enumerate(self.pages):
+            row = index // collunms
+            col = index % collunms
+            self.pageLayout.addWidget(card, row, col)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.updateCurrentGrid()
+
+    def clearPages(self):
+        for page in self.pages:
+            self.pageLayout.removeWidget(page)
+            page.deleteLater()
+        
+        self.pages.clear()
 
     def toggleSelectInfo(self, checked):
         if checked:
