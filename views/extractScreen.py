@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
-    QGridLayout, QScrollArea, QGraphicsBlurEffect, QRadioButton, QButtonGroup
+    QGridLayout, QScrollArea, QGraphicsBlurEffect, QButtonGroup, QLineEdit, QCheckBox
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
@@ -159,25 +159,78 @@ class ExtractScreen(QWidget):
         # option info text
         self.settingStack = QStackedWidget()
 
-        # all pages box information
+        # ===== all pages box information =====
         allPagesInfo = QWidget()
         allPagesLayout = QVBoxLayout(allPagesInfo)
 
-        allPagesText = QLabel('All pages kakakak')
-
+        allPagesText = QLabel('Extract all pages:')
         allPagesText.setWordWrap(True)
+
+        # all page info text
+        self.allPagesInfoContainer = QFrame()
+        allPagesInfoLayout = QVBoxLayout(self.allPagesInfoContainer)
+        self.allPagesInfoContainer.setStyleSheet('''
+            QFrame {
+                background-color: #def2ff;
+                border-radius: 10px;
+                padding: 0px 5px;
+            }
+        ''')
+
+        allPagesInfoText = QLabel('ℹ️Selected pages will be convert to separated PDFs files.')
+        allPagesInfoText.setWordWrap(True)
+        allPagesInfoText.setStyleSheet('color: black;')
+        allPagesInfoText.setAlignment(Qt.AlignCenter)
+
+        allPagesInfoLayout.addWidget(allPagesInfoText)
         
         allPagesLayout.addWidget(allPagesText)
+        allPagesLayout.addSpacing(30)
+        allPagesLayout.addWidget(self.allPagesInfoContainer)
         allPagesLayout.addStretch()
 
-        # select pages box information
+        # ==== select pages box information =====
         selectPageInfo = QWidget()
         selectPageLayout = QVBoxLayout(selectPageInfo)
 
-        selectPageText = QLabel('Select pages akakkakaka')
+        selectPageText = QLabel('Extract Mode:')
         selectPageText.setWordWrap(True)
 
+        # input for the selected pages
+        self.pageInput = QLineEdit()
+        self.pageInput.setPlaceholderText('Example: 1-5,8-10')
+        self.pageInput.setMinimumHeight(35)
+
+        # extract to one pdf chebok
+        self.extractToOne = QCheckBox('Merge extract pages into one PDF!')
+
+        # select page info text
+        self.selectInfoContainer = QFrame()
+        selectInfoLayout = QVBoxLayout(self.selectInfoContainer)
+        self.selectInfoContainer.setStyleSheet('''
+            QFrame {
+                background-color: #def2ff;
+                border-radius: 10px;
+                padding: 0px 5px;
+            }
+        ''')
+
+        selectPageInfoText = QLabel('ℹ️Selected pages will be convert to separated PDFs files.')
+        selectPageInfoText.setWordWrap(True)
+        selectPageInfoText.setStyleSheet('color: black;')
+        selectPageInfoText.setAlignment(Qt.AlignCenter)
+
+        selectInfoLayout.addWidget(selectPageInfoText)
+
+        self.extractToOne.toggled.connect(
+            self.toggleSelectInfo
+        )
+
         selectPageLayout.addWidget(selectPageText)
+        selectPageLayout.addWidget(self.pageInput)
+        selectPageLayout.addWidget(self.extractToOne)
+        selectPageLayout.addSpacing(10)
+        selectPageLayout.addWidget(self.selectInfoContainer)
         selectPageLayout.addStretch()
 
         self.settingStack.addWidget(allPagesInfo)
@@ -210,3 +263,10 @@ class ExtractScreen(QWidget):
         self.innerStack.addWidget(self.settingStep)
         self.innerStack.addWidget(self.selectFileStep)
 
+
+    def toggleSelectInfo(self, checked):
+        if checked:
+            self.selectInfoContainer.hide()
+        else:
+            self.selectInfoContainer.show()
+            
