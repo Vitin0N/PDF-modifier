@@ -5,11 +5,12 @@ from PySide6.QtWidgets import (
     QFrame,
     QSizePolicy,
     QPushButton,
-    QHBoxLayout
+    QHBoxLayout,
+    QApplication
 )
-from PySide6.QtGui import QFont 
+from PySide6.QtGui import QFont, QDrag, QPixmap
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QMimeData, QPoint
 
 class FileCards(QFrame):
     removeRequest = Signal(object)
@@ -91,6 +92,7 @@ class FileCards(QFrame):
         # buttons commands 
         self.removeBtn.clicked.connect(self.handleRemove)
 
+    # events functions
     def enterEvent(self, event):
         self.removeBtn.show()
         super().enterEvent(event)
@@ -98,6 +100,32 @@ class FileCards(QFrame):
     def leaveEvent(self, event):
         self.removeBtn.hide()
         super().leaveEvent(event)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragStartPos = event.pos()
+        
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if not (event.buttons() & Qt.LeftButton):
+            return
+        
+        if (event.pos() - self.dragStartPos).manhattanLength() < QApplication.startDragDistance():
+            return
+        
+        drag = QDrag(self)
+        mimeData = QMimeData()
+
+        mimeData.setText(self.filepath)
+        drag.setMimeData(mimeData)
+
+        pixmap = self.grab()
+        drag.setPixmap(pixmap)
+        drag.setHotSpot(event.pos())
+
+        drag.exec()
+
 
     # Command functions
     def handleRemove(self):

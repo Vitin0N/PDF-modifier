@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
     QGridLayout, QScrollArea, QGraphicsBlurEffect
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QSize
 from PySide6.QtGui import QFont
 import os
 
@@ -11,6 +11,7 @@ from components._chooseFileScreen import ChooseFileWidget
 from core.chooseFileDialog import chooseFile
 from components.loadingDialog import LoadingDialog
 from core.mergeWorker import MergeWorker
+from components.dropGridFrame import DrogGridFrame
 
 class MergeScreen(QWidget):
     def __init__(self):
@@ -81,7 +82,8 @@ class MergeScreen(QWidget):
 
 
         # grid with the file icons
-        self.fileFrame = QFrame()
+        self.fileFrame = DrogGridFrame()
+        self.fileFrame.reordered.connect(self.reorderCards)
         self.fileFrame.setFrameStyle(QFrame.StyledPanel)
 
         self.fileLayout = QGridLayout(self.fileFrame)
@@ -317,7 +319,21 @@ class MergeScreen(QWidget):
             self.canMergeContainer.show()
 
             self.changeMergeBtnState(True)
-            
+
+    def reorderCards(self, filepath, newIndex):
+        oldIndex = self.selectedFile.index(filepath)
+
+        if oldIndex == newIndex:
+            return
+        
+        reoderFile = self.selectedFile.pop(oldIndex)
+        self.selectedFile.insert(newIndex, reoderFile)
+
+        card = self.cards.pop(oldIndex)
+        self.cards.insert(newIndex, card)
+
+        self.updateCurrentGrid()
+
     def mergePdfs(self):
         if not self.canMerge:
             return
@@ -349,7 +365,6 @@ class MergeScreen(QWidget):
         )
 
         self.worker.start()
-
 
     def finishMerge(self):  
 
