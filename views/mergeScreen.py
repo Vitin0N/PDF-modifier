@@ -2,9 +2,10 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
     QGridLayout, QScrollArea, QGraphicsBlurEffect
 )
-from PySide6.QtCore import Qt, QTimer, QSize
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 import os
+import time
 
 from components.fileCard import FileCards
 from components._chooseFileScreen import ChooseFileWidget
@@ -16,7 +17,6 @@ from components.dropGridFrame import DrogGridFrame
 class MergeScreen(QWidget):
     def __init__(self):
         super().__init__()
-
 
         self.cards = []
 
@@ -79,7 +79,6 @@ class MergeScreen(QWidget):
         # scroll area for files
         self.fileScrollArea = QScrollArea()
         self.fileScrollArea.setWidgetResizable(True)
-
 
         # grid with the file icons
         self.fileFrame = DrogGridFrame()
@@ -148,7 +147,8 @@ class MergeScreen(QWidget):
         ''')
 
         infoText = QLabel('ℹ️ The merge order will be the order thats appears on the screen, ' \
-                            'so the PDFs will me merged based on the order in which you selected them.')
+                            'so the PDFs will me merged based on the order in which you selected them.\n\n' \
+                            'You can still change the order by dragging the cards and placing them in the desired position.')
         infoText.setAlignment(Qt.AlignCenter)
         infoText.setStyleSheet('''color: black;''')
         infoText.setWordWrap(True)
@@ -197,15 +197,25 @@ class MergeScreen(QWidget):
         self.addFilesBtn.clicked.connect(self.addFiles)
         self.mergeBtn.clicked.connect(self.mergePdfs)
 
+    # screen functions
     def continueToMergeScreen(self, filepaths):
+        self.loadingProcess.showOverlay('', mode='spin')
+        
+        self.innerStack.setCurrentIndex(1)
+        QTimer.singleShot(
+            0, 
+            lambda: self.loadMergeScreen(filepaths)
+        )
+
+    def loadMergeScreen(self, filepaths):
         self.selectedFile = filepaths
 
         self.updateMergeBtnState()
         self.createFileCard(filepaths)
 
         QTimer.singleShot(0, self.updateCurrentGrid)
+        self.loadingProcess.hideOverlay()
 
-        self.innerStack.setCurrentIndex(1)
 
     def backChoosingFile(self):
         self.selectedFile.clear()

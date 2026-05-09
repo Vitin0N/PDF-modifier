@@ -88,5 +88,4 @@ class DrogGridFrame(QFrame):
                 rect = widget.geometry()
                 painter.drawLine(rect.topLeft(), rect.topRight())
 
-
             painter.end()

@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
 
 from views.homeScreen import HomeView
 from views.mergeScreen import MergeScreen
+from views.extractScreen import ExtractScreen
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -45,10 +46,12 @@ class AppWindow(QMainWindow):
         # Screens of the processes
         self.homeScreen = HomeView()
         self.mergeScreen = MergeScreen()
+        self.extractScreen = ExtractScreen()
 
         # Add screens to the stack
         self.stackWidget.addWidget(self.homeScreen)
         self.stackWidget.addWidget(self.mergeScreen)
+        self.stackWidget.addWidget(self.extractScreen)
 
         mainLayout.addWidget(self.sidebar)
         mainLayout.addWidget(self.stackWidget)
@@ -75,3 +78,4 @@ class AppWindow(QMainWindow):
     
     def showExtractScreen(self):
         print("Extract Screen")
+        self.stackWidget.setCurrentIndex(2)
