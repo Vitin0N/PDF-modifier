@@ -19,6 +19,7 @@ class ExtractScreen(QWidget):
         # initial var
         self.selectFile = ''
         self.pages = []
+        self.selectedPages = set()
 
         # screen construction
         mainLayout = QVBoxLayout(self)
@@ -124,10 +125,14 @@ class ExtractScreen(QWidget):
         allPagesBtn.setMinimumHeight(50)
         allPagesBtn.setChecked(True)
 
+        allPagesBtn.clicked.connect(self.selectAllPages)
+
         selectPageBtn = QPushButton('Select pages')
         selectPageBtn.setCheckable(True)
         selectPageBtn.setCursor(Qt.PointingHandCursor)
         selectPageBtn.setMinimumHeight(50)
+
+        selectPageBtn.clicked.connect(self.enableSelectMode)
 
         optionGroup = QButtonGroup(self)
         optionGroup.setExclusive(True)
@@ -284,13 +289,14 @@ class ExtractScreen(QWidget):
     def loadExtractScreen(self, filepath):
         self.selectFile = filepath
 
-        # TODO criar as paginas e fazer o updategrid
         self.clearPages()
         self.filepath = "".join(filepath)
 
         self.thumbWoker = ThumbWorker(self.filepath)
         self.thumbWoker.pageRendered.connect(self.addPageCard)
+
         self.thumbWoker.finished.connect(self.loading.hideOverlay)
+        self.thumbWoker.finished.connect(self.selectAllPages)
 
         self.thumbWoker.start()
 
@@ -304,9 +310,88 @@ class ExtractScreen(QWidget):
         pixmap = QPixmap.fromImage(qimage)
         card = PageCard(pageIndex, pixmap)
 
+        card.clicked.connect(self.togglePageSelection)
+
         self.pages.append(card)
 
         self.updateCurrentGrid()
+
+    def togglePageSelection(self, pageIndex):
+        if self.settingStack.currentIndex() == 0:
+            return
+        
+        for page in self.pages:
+            if page.pageIndex == pageIndex:
+                if pageIndex in self.selectedPages:
+                    self.selectedPages.remove(pageIndex)
+                    page.setSelected(False)
+
+                else:
+                    self.selectedPages.add(pageIndex)
+                    page.setSelected(True)
+
+                break
+
+        self.updatePageInput()
+
+    def selectAllPages(self):
+        self.selectedPages.clear()
+
+        for page in self.pages:
+            page.setSelected(True)
+            self.selectedPages.add(page.pageIndex)
+
+        self.updatePageInput()
+
+    def deselectAllPages(self):
+        self.selectedPages.clear()
+
+        for page in self.pages:
+            page.setSelected(False)
+
+        self.updatePageInput()
+
+    def updatePageInput(self):
+        if not self.selectedPages:
+            self.pageInput.clear()
+            return
+        
+        selected = sorted(self.selectedPages)
+
+        finalText = ''
+        start = selected[0]
+        end = selected[0]
+        result = []
+        for i in range(1, len(selected)):
+            current = selected[i]
+
+            if current == end + 1:
+                end = current
+            else:
+                if start == end:
+                    result.append(str(start+1))
+                else:
+                    result.append(f'{start+1}-{end+1}')
+            
+                start = current
+                end = current
+
+        if start == end:
+            result.append(f'{start+1}')
+        else:
+            result.append(f'{start+1}-{end+1}')
+
+        finalText = ','.join(result)
+
+        
+        self.pageInput.setText(finalText)
+
+    def enableSelectMode(self):
+        self.deselectAllPages()
+        self.settingStack.setCurrentIndex(1)
+
+        for card in self.pages:
+            card.setSelected(card.pageIndex in self.selectedPages)
 
     def updateCurrentGrid(self):
         if not self.pages:

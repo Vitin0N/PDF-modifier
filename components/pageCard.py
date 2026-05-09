@@ -10,6 +10,7 @@ class PageCard(QFrame):
         super().__init__()
 
         self.pageIndex = pageIndex
+        self.selected = False
 
         self.setCursor(Qt.PointingHandCursor)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -58,6 +59,20 @@ class PageCard(QFrame):
             }
         ''')
 
+        self.checkLabel = QLabel('✓', self)
+        self.checkLabel.setFixedSize(24, 24)
+        self.checkLabel.setAlignment(Qt.AlignCenter)
+        self.checkLabel.setStyleSheet('''
+            QLabel {
+            background-color: #22c55e;
+            color: white;
+            border-radius: 12px;
+            font-weight: bold;
+                                      }
+        ''')
+
+        self.checkLabel.hide()
+
         layout.addWidget(self.imgLabel)
         layout.addWidget(self.pageLabel)
 
@@ -65,6 +80,14 @@ class PageCard(QFrame):
         if event.button() == Qt.LeftButton:
             self.clicked.emit(self.pageIndex)
         super().mousePressEvent(event)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+
+        self.checkLabel.move(
+            self.width() - 30,
+            6
+        )
 
     def mouseMoveEvent(self, event):
         if not (event.buttons() & Qt.LeftButton):
@@ -82,3 +105,23 @@ class PageCard(QFrame):
         drag.setHotSpot(event.pos())
         
         drag.exec()
+
+    def setSelected(self, value):
+        self.selected = value
+        self.checkLabel.setVisible(value)
+        self.updateStyle()
+
+    def updateStyle(self):
+        borderColor = '#22c55e' if self.selected else 'transparent'
+
+        self.setStyleSheet(f'''
+        QFrame {{
+            border-radius: 14px;
+            border: 2px solid {borderColor};
+        }}
+
+        QLabel {{
+            border: none;
+            background: transparent;
+        }}
+    ''')
