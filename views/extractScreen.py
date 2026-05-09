@@ -58,7 +58,7 @@ class ExtractScreen(QWidget):
         self.filePageFrame.setWidgetResizable(True)
 
         self.pagesFrame = DrogGridFrame()
-        # self.pagesFrame.reordered.connect(...) # TODO make the function
+        self.pagesFrame.reordered.connect(self.reoderCards) 
         self.pagesFrame.setFrameStyle(QFrame.StyledPanel)
 
         self.pageLayout = QGridLayout()
@@ -335,6 +335,23 @@ class ExtractScreen(QWidget):
             page.deleteLater()
         
         self.pages.clear()
+
+    def reoderCards(self, index, newIndex):
+        oldIndex = -1
+
+        for i, card in enumerate(self.pages):
+            if card.pageIndex == index:
+                oldIndex = i
+                break
+
+
+        if oldIndex == newIndex or oldIndex == -1:
+            return
+        
+        reoderPage = self.pages.pop(oldIndex)
+        self.pages.insert(newIndex, reoderPage)
+
+        self.updateCurrentGrid()
 
     def toggleSelectInfo(self, checked):
         if checked:

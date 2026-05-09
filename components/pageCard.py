@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QLabel, QSizePolicy
-from PySide6.QtGui import QPixmap, QImage, QDrag
+from PySide6.QtGui import QDrag, QFont
 from PySide6.QtCore import Qt, Signal, QMimeData
 import fitz  # Importando o PyMuPDF
 
@@ -20,7 +20,7 @@ class PageCard(QFrame):
         self.setStyleSheet('''
             QFrame {
                 border-radius: 10px;
-                border: 2px solid #ccc;
+                border: none;
             }
             QFrame:hover {
                 border: 2px solid #e5322d;
@@ -33,13 +33,30 @@ class PageCard(QFrame):
         # the page image
         self.imgLabel = QLabel()
         self.imgLabel.setAlignment(Qt.AlignCenter)
+        self.imgLabel.setStyleSheet('''
+            QLabel {
+                border: none;
+            }
+        ''')
 
         pixmapResized = pixmap.scaled(120, 140, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.imgLabel.setPixmap(pixmapResized)
 
         # the page index
+        indexFont = QFont()
+        indexFont.setPixelSize(15)
+        indexFont.setBold(True)
+
         self.pageLabel = QLabel(f'{pageIndex + 1}')
         self.pageLabel.setAlignment(Qt.AlignCenter)
+        self.pageLabel.setFont(indexFont)
+        self.pageLabel.setStyleSheet('''
+            QLabel {
+                background-color: #404040;
+                border: none;
+                max-height: 30px;
+            }
+        ''')
 
         layout.addWidget(self.imgLabel)
         layout.addWidget(self.pageLabel)
