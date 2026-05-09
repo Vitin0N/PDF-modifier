@@ -12,7 +12,7 @@ from components._chooseFileScreen import ChooseFileWidget
 from core.chooseFileDialog import chooseFile
 from components.loadingDialog import LoadingDialog
 from core.mergeWorker import MergeWorker
-from components.dropGridFrame import DrogGridFrame
+from components.dropFileGridFrame import DrogGridFrame
 
 class MergeScreen(QWidget):
     def __init__(self):

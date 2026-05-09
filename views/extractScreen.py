@@ -7,7 +7,7 @@ from PySide6.QtGui import QFont, QPixmap
 
 from components._chooseFileScreen import ChooseFileWidget
 from components.loadingDialog import LoadingDialog
-from components.dropGridFrame import DrogGridFrame
+from components.dropPageGridFrame import DrogGridFrame
 from components.pageCard import PageCard
 from core.thumbWorker import ThumbWorker
 
@@ -293,6 +293,12 @@ class ExtractScreen(QWidget):
         self.thumbWoker.finished.connect(self.loading.hideOverlay)
 
         self.thumbWoker.start()
+
+    def resetScreen(self):
+        self.selectFile = ''
+        self.filepath = ''
+        self.clearPages()
+        self.innerStack.setCurrentIndex(0)
 
     def addPageCard(self, pageIndex, qimage):
         pixmap = QPixmap.fromImage(qimage)

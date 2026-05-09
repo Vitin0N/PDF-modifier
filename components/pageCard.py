@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QLabel, QSizePolicy
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QPixmap, QImage, QDrag
+from PySide6.QtCore import Qt, Signal, QMimeData
 import fitz  # Importando o PyMuPDF
 
 class PageCard(QFrame):
@@ -44,8 +44,24 @@ class PageCard(QFrame):
         layout.addWidget(self.imgLabel)
         layout.addWidget(self.pageLabel)
 
-
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.clicked.emit(self.pageIndex)
         super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if not (event.buttons() & Qt.LeftButton):
+            return
+        
+        drag = QDrag(self)
+        mimeData = QMimeData()
+
+        mimeData.setText(str(self.pageIndex))
+        drag.setMimeData(mimeData)
+
+        pixmap = self.grab()
+
+        drag.setPixmap(pixmap)
+        drag.setHotSpot(event.pos())
+        
+        drag.exec()

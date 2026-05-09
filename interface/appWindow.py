@@ -78,4 +78,6 @@ class AppWindow(QMainWindow):
     
     def showExtractScreen(self):
         print("Extract Screen")
+        self.extractScreen.resetScreen()
+        
         self.stackWidget.setCurrentIndex(2)
