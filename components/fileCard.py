@@ -121,7 +121,13 @@ class FileCards(QFrame):
         drag.setMimeData(mimeData)
 
         pixmap = self.grab()
-        drag.setPixmap(pixmap)
+        smallerPixmap = pixmap.scaled(
+            130, 130,
+            Qt.KeepAspectRatio,
+            Qt.SmoothTransformation
+        )
+
+        drag.setPixmap(smallerPixmap)
         drag.setHotSpot(event.pos())
 
         drag.exec()
