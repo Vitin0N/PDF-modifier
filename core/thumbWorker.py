@@ -17,7 +17,7 @@ class ThumbWorker(QThread):
             for pageIndex in range(totalPages):
                 page = doc.load_page(pageIndex)
 
-                zoomMatrix = fitz.Matrix(0.4, 0.4)
+                zoomMatrix = fitz.Matrix(0.2, 0.2)
                 pix = page.get_pixmap(matrix=zoomMatrix)
 
                 img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)

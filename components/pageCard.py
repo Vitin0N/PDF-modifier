@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QLabel, QSizePolicy, QApplication
 from PySide6.QtGui import QDrag, QFont
-from PySide6.QtCore import Qt, Signal, QMimeData
-import fitz  # Importando o PyMuPDF
+from PySide6.QtCore import Qt, Signal, QMimeData, QTimer
 
 class PageCard(QFrame):
     clicked = Signal(int)
@@ -111,9 +110,15 @@ class PageCard(QFrame):
         mimeData.setText(str(self.pageIndex))
         drag.setMimeData(mimeData)
 
-        pixmap = self.grab()
+        
 
-        drag.setPixmap(pixmap)
+        drag.setPixmap(self.grab().scaled(
+            100,
+            120, 
+            Qt.KeepAspectRatio,
+            Qt.FastTransformation
+            )
+        )
         drag.setHotSpot(event.pos())
         
         drag.exec()

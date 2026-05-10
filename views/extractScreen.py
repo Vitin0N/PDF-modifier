@@ -20,6 +20,12 @@ class ExtractScreen(QWidget):
         self.selectFile = ''
         self.pages = []
         self.selectedPages = set()
+        self.currentCollumns = 0
+
+        # timer to resize
+        self.resizeTimer = QTimer()
+        self.resizeTimer.setSingleShot(True)
+        self.resizeTimer.timeout.connect(self.updateCurrentGrid)
 
         # screen construction
         mainLayout = QVBoxLayout(self)
@@ -48,6 +54,7 @@ class ExtractScreen(QWidget):
         topButtons = QHBoxLayout()
 
         self.backButton = QPushButton('Back')
+        self.backButton.clicked.connect(self.backToChooseFileScreen)
 
         topButtons.addWidget(self.backButton)
         topButtons.addStretch()
@@ -279,6 +286,18 @@ class ExtractScreen(QWidget):
         self.innerStack.addWidget(self.selectFileStep)
         self.innerStack.addWidget(self.settingStep)
 
+    # ===== Funtions ======
+
+    def backToChooseFileScreen(self):
+        if hasattr(self, 'thumbWorker') and self.thumbWorker.isRunning():
+            self.thumbWorker.quit()
+            self.thumbWorker.wait()
+
+        self.resetScreen()
+        self.clearPages()
+
+        self.innerStack.setCurrentIndex(0)
+
     def continueToExtractScreen(self, filepath):
         self.loading.showOverlay('', mode='spin')
 
@@ -294,19 +313,25 @@ class ExtractScreen(QWidget):
         self.clearPages()
         self.filepath = "".join(filepath)
 
-        self.thumbWoker = ThumbWorker(self.filepath)
-        self.thumbWoker.pageRendered.connect(self.addPageCard)
+        self.thumbWorker = ThumbWorker(self.filepath)
+        self.thumbWorker.pageRendered.connect(self.addPageCard)
 
-        self.thumbWoker.finished.connect(self.loading.hideOverlay)
-        self.thumbWoker.finished.connect(self.selectAllPages)
+        self.thumbWorker.finished.connect(self.loading.hideOverlay)
+        self.thumbWorker.finished.connect(self.selectAllPages)
 
-        self.thumbWoker.start()
+        self.thumbWorker.start()
 
     def resetScreen(self):
         self.selectFile = ''
         self.filepath = ''
+        self.selectedPages.clear()
         self.clearPages()
+
+        if hasattr(self, 'thumbWoker'):
+            self.thumbWorker = None
+
         self.allPagesBtn.setChecked(True)
+        self.settingStack.setCurrentIndex(0)
         self.innerStack.setCurrentIndex(0)
 
     def addPageCard(self, pageIndex, qimage):
@@ -429,7 +454,7 @@ class ExtractScreen(QWidget):
             pass
 
 
-    def updateCurrentGrid(self):
+    def updateCurrentGrid(self, force=False):
         if not self.pages:
             return
         
@@ -437,6 +462,11 @@ class ExtractScreen(QWidget):
         cardWidth = 170
 
         collunms = max(1, width // cardWidth)
+
+        if collunms == self.currentCollumns and not force:
+            return
+        
+        self.currentCollumns = collunms
 
         while self.pageLayout.count():
             item = self.pageLayout.takeAt(0)
@@ -448,7 +478,7 @@ class ExtractScreen(QWidget):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.updateCurrentGrid()
+        self.resizeTimer.start(100)
 
     def clearPages(self):
         for page in self.pages:
@@ -471,7 +501,7 @@ class ExtractScreen(QWidget):
         reoderPage = self.pages.pop(oldIndex)
         self.pages.insert(newIndex, reoderPage)
 
-        self.updateCurrentGrid()
+        self.updateCurrentGrid(force=True)
 
     def toggleSelectInfo(self, checked):
         if checked:
