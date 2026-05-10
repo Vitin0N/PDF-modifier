@@ -150,7 +150,7 @@ class MergeScreen(QWidget):
                             'so the PDFs will me merged based on the order in which you selected them.\n\n' \
                             'You can still change the order by dragging the cards and placing them in the desired position.')
         infoText.setAlignment(Qt.AlignCenter)
-        infoText.setStyleSheet('''color: black;''')
+        infoText.setStyleSheet('color: black;')
         infoText.setWordWrap(True)
 
         infoLayout.addWidget(infoText)
@@ -361,7 +361,6 @@ class MergeScreen(QWidget):
         self.settingSide.setGraphicsEffect(self.settingBlur)
 
         # TODO processing merge PDF
-
         self.loadingProcess.showOverlay('Merging PDFs...', mode='progress')
 
         self.worker = MergeWorker(self.selectedFile)

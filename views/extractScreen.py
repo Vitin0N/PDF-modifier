@@ -10,6 +10,7 @@ from components.loadingDialog import LoadingDialog
 from components.dropPageGridFrame import DrogGridFrame
 from components.pageCard import PageCard
 from core.thumbWorker import ThumbWorker
+from core.extractWorker import ExtractWorker
 
 
 class ExtractScreen(QWidget):
@@ -91,6 +92,16 @@ class ExtractScreen(QWidget):
         extractBtnFont.setPixelSize(30)
         extractBtnFont.setBold(True)
 
+        canExtractFont = QFont()
+        canExtractFont.setBold(True)
+        canExtractFont.setPixelSize(13)
+
+        self.canExtractText = QLabel('You can only extract if there is more than one page selected file.')
+        self.canExtractText.setFont(canExtractFont)
+        self.canExtractText.setAlignment(Qt.AlignCenter)
+        self.canExtractText.setWordWrap(True)
+        self.canExtractText.hide()
+
         self.extractBtn = QPushButton("Extract Pages")
         self.extractBtn.setFont(extractBtnFont)
         self.extractBtn.setStyleSheet('''
@@ -112,6 +123,7 @@ class ExtractScreen(QWidget):
             }                      
         ''')
         self.extractBtn.setMinimumHeight(60)
+        self.extractBtn.clicked.connect(self.extractPages)
 
         nameFont = QFont()
         nameFont.setPixelSize(30)
@@ -275,6 +287,7 @@ class ExtractScreen(QWidget):
         settingLayout.addLayout(optionTabLayout)
         settingLayout.addWidget(self.settingStack)
         settingLayout.addStretch()
+        settingLayout.addWidget(self.canExtractText)
         settingLayout.addWidget(self.extractBtn)
         settingLayout.addSpacing(20)
 
@@ -391,6 +404,7 @@ class ExtractScreen(QWidget):
 
         self.updatePageInput()
         self.updateInfoText()
+        self.setCanExtract()
 
     def selectAllPages(self):
         # clear previous selection
@@ -403,6 +417,7 @@ class ExtractScreen(QWidget):
 
         self.updatePageInput()
         self.updateInfoText()
+        self.setCanExtract()
 
     def deselectAllPages(self):
         # clear previous selection
@@ -414,6 +429,7 @@ class ExtractScreen(QWidget):
 
         self.updatePageInput()
         self.updateInfoText()
+        self.setCanExtract()
 
     def updatePageInput(self):
         # clear input if nothing selected
@@ -505,6 +521,7 @@ class ExtractScreen(QWidget):
 
         # update info text
         self.updateInfoText()
+        self.setCanExtract()
 
 
     def updateCurrentGrid(self, force=False):
@@ -580,6 +597,20 @@ class ExtractScreen(QWidget):
             self.selectInfoContainer.hide()
         else:
             self.selectInfoContainer.show()
+    
+    def setCanExtract(self):
+        if len(self.selectedPages) == 0:
+            self.extractBtn.setCursor(Qt.ForbiddenCursor)
+            self.extractBtn.setProperty('blocked', True)
+            self.canExtractText.show()
+        else:
+            self.extractBtn.setCursor(Qt.PointingHandCursor)
+            self.extractBtn.setProperty('blocked', False)
+            self.canExtractText.hide()
+
+        self.extractBtn.style().unpolish(self.extractBtn)
+        self.extractBtn.style().polish(self.extractBtn) 
+
 
     def updateInfoText(self):
         total = len(self.selectedPages)
@@ -593,4 +624,40 @@ class ExtractScreen(QWidget):
             f'ℹ️ Selected pages will be converted to separated PDF files. '
             f'<b>{total} PDFs</b> will be created.'
         )
-            
+
+    def extractPages(self):
+        # set blur effect
+        self.mainBlur = QGraphicsBlurEffect()
+        self.mainBlur.setBlurRadius(8)
+        self.mainSide.setGraphicsEffect(self.mainBlur)
+
+        self.settingBlur = QGraphicsBlurEffect()
+        self.settingBlur.setBlurRadius(8)
+        self.settingSide.setGraphicsEffect(self.settingBlur)
+
+        # TODO processing extract pages
+        self.loading.showOverlay('Extract Pages...', mode='progress')
+        self.worker = ExtractWorker(self.filepath, self.selectedPages)
+
+        self.worker.progress.connect(
+            self.loading.updateProgress
+        )
+
+        self.worker.finished.connect(
+            self.finishExtract
+        )
+
+        self.worker.start()
+
+    def finishExtract(self):
+            # remove blur effect
+        self.mainSide.setGraphicsEffect(None)
+        self.settingSide.setGraphicsEffect(None)
+
+        self.loading.progressBar.setValue(0)
+
+        self.loading.hideOverlay()
+
+        print('Terminou')
+
+        self.resetScreen()
