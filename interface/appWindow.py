@@ -3,9 +3,9 @@ from PySide6.QtWidgets import (
     QPushButton, QStackedWidget, QLabel
 )
 
-from views.homeScreen import HomeView
-from views.mergeScreen import MergeScreen
-from views.extractScreen import ExtractScreen
+from ui.views.homeScreen import HomeView
+from ui.views.mergeScreen import MergeScreen
+from ui.views.extractScreen import ExtractScreen
 
 class AppWindow(QMainWindow):
     def __init__(self):

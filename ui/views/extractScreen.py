@@ -6,11 +6,11 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont, QPixmap
 
 from components._chooseFileScreen import ChooseFileWidget
-from components.loadingDialog import LoadingDialog
-from components.dropPageGridFrame import DrogGridFrame
-from components.pageCard import PageCard
-from core.thumbWorker import ThumbWorker
-from core.extractWorker import ExtractWorker
+from ui.widgets.loadingDialog import LoadingDialog
+from ui.layouts.dropPageGridFrame import DrogGridFrame
+from ui.widgets.pageCard import PageCard
+from core.worker.thumbWorker import ThumbWorker
+from core.worker.extractWorker import ExtractWorker
 
 
 class ExtractScreen(QWidget):

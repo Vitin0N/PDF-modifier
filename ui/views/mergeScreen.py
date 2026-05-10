@@ -7,12 +7,12 @@ from PySide6.QtGui import QFont
 import os
 import time
 
-from components.fileCard import FileCards
+from ui.widgets.fileCard import FileCards
 from components._chooseFileScreen import ChooseFileWidget
 from core.chooseFileDialog import chooseFile
-from components.loadingDialog import LoadingDialog
-from core.mergeWorker import MergeWorker
-from components.dropFileGridFrame import DrogGridFrame
+from ui.widgets.loadingDialog import LoadingDialog
+from core.worker.mergeWorker import MergeWorker
+from ui.layouts.dropFileGridFrame import DrogGridFrame
 
 class MergeScreen(QWidget):
     def __init__(self):
