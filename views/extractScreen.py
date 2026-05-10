@@ -198,12 +198,12 @@ class ExtractScreen(QWidget):
             }
         ''')
 
-        allPagesInfoText = QLabel('ℹ️Selected pages will be convert to separated PDFs files.')
-        allPagesInfoText.setWordWrap(True)
-        allPagesInfoText.setStyleSheet('color: black;')
-        allPagesInfoText.setAlignment(Qt.AlignCenter)
+        self.allPagesInfoText = QLabel()
+        self.allPagesInfoText.setWordWrap(True)
+        self.allPagesInfoText.setStyleSheet('color: black;')
+        self.allPagesInfoText.setAlignment(Qt.AlignCenter)
 
-        allPagesInfoLayout.addWidget(allPagesInfoText)
+        allPagesInfoLayout.addWidget(self.allPagesInfoText)
         
         allPagesLayout.addWidget(allPagesText)
         allPagesLayout.addSpacing(30)
@@ -238,12 +238,12 @@ class ExtractScreen(QWidget):
             }
         ''')
 
-        selectPageInfoText = QLabel('ℹ️Selected pages will be convert to separated PDFs files.')
-        selectPageInfoText.setWordWrap(True)
-        selectPageInfoText.setStyleSheet('color: black;')
-        selectPageInfoText.setAlignment(Qt.AlignCenter)
+        self.selectPageInfoText = QLabel()
+        self.selectPageInfoText.setWordWrap(True)
+        self.selectPageInfoText.setStyleSheet('color: black;')
+        self.selectPageInfoText.setAlignment(Qt.AlignCenter)
 
-        selectInfoLayout.addWidget(selectPageInfoText)
+        selectInfoLayout.addWidget(self.selectPageInfoText)
 
         self.extractToOne.toggled.connect(
             self.toggleSelectInfo
@@ -286,74 +286,103 @@ class ExtractScreen(QWidget):
         self.innerStack.addWidget(self.selectFileStep)
         self.innerStack.addWidget(self.settingStep)
 
-    # ===== Funtions ======
-
+    # ===== Funtions =====
     def backToChooseFileScreen(self):
+        # stop thumbnail redering thread
         if hasattr(self, 'thumbWorker') and self.thumbWorker.isRunning():
             self.thumbWorker.quit()
             self.thumbWorker.wait()
 
+        # reset all screen component and page card
         self.resetScreen()
         self.clearPages()
 
+        # change stack to choose file screen
         self.innerStack.setCurrentIndex(0)
 
     def continueToExtractScreen(self, filepath):
+        # show loading overlay
         self.loading.showOverlay('', mode='spin')
 
+        # switch to extract screen
         self.innerStack.setCurrentIndex(1)
+
+        # call the load extract screen
         QTimer.singleShot(
             0,
             lambda: self.loadExtractScreen(filepath)
         )
 
     def loadExtractScreen(self, filepath):
+        # store the filepath
         self.selectFile = filepath
 
+        # if exist clear the old pages
         self.clearPages()
         self.filepath = "".join(filepath)
 
+        # create worker thread for thumbnail rendering
         self.thumbWorker = ThumbWorker(self.filepath)
+
+        # add pages whenever a page is rendered
         self.thumbWorker.pageRendered.connect(self.addPageCard)
 
+        # hide loading overlay
         self.thumbWorker.finished.connect(self.loading.hideOverlay)
         self.thumbWorker.finished.connect(self.selectAllPages)
 
         self.thumbWorker.start()
 
     def resetScreen(self):
+        # reset all file data
         self.selectFile = ''
         self.filepath = ''
         self.selectedPages.clear()
         self.clearPages()
 
-        if hasattr(self, 'thumbWoker'):
+        # reset thumbWorker
+        if hasattr(self, 'thumbWorker'):
             self.thumbWorker = None
 
+        # restore default UI
         self.allPagesBtn.setChecked(True)
         self.settingStack.setCurrentIndex(0)
         self.innerStack.setCurrentIndex(0)
 
     def addPageCard(self, pageIndex, qimage):
         pixmap = QPixmap.fromImage(qimage)
+
+        # create page cards
         card = PageCard(pageIndex, pixmap)
 
         card.clicked.connect(self.togglePageSelection)
 
         self.pages.append(card)
 
-        self.updateCurrentGrid()
+        # otimization: if the col dont change only add a card in a correct pos
+        if self.currentCollumns > 0:
+            index = len(self.pages) - 1
+            row = index // self.currentCollumns
+            col = index % self.currentCollumns
+            self.pageLayout.addWidget(card, row, col)
+        else:
+            self.updateCurrentGrid()
 
     def togglePageSelection(self, pageIndex):
+        # ignore click if the current screen is extract all
         if self.settingStack.currentIndex() == 0:
             return
         
+        # find clicked page card
         for page in self.pages:
             if page.pageIndex == pageIndex:
+
+                # deselect page
                 if pageIndex in self.selectedPages:
                     self.selectedPages.remove(pageIndex)
                     page.setSelected(False)
 
+                # select page
                 else:
                     self.selectedPages.add(pageIndex)
                     page.setSelected(True)
@@ -361,29 +390,38 @@ class ExtractScreen(QWidget):
                 break
 
         self.updatePageInput()
+        self.updateInfoText()
 
     def selectAllPages(self):
+        # clear previous selection
         self.selectedPages.clear()
 
+        # select every page
         for page in self.pages:
             page.setSelected(True)
             self.selectedPages.add(page.pageIndex)
 
         self.updatePageInput()
+        self.updateInfoText()
 
     def deselectAllPages(self):
+        # clear previous selection
         self.selectedPages.clear()
-
+        
+        # deselect every page
         for page in self.pages:
             page.setSelected(False)
 
         self.updatePageInput()
+        self.updateInfoText()
 
     def updatePageInput(self):
+        # clear input if nothing selected
         if not self.selectedPages:
             self.pageInput.clear()
             return
         
+        # sort selected pages
         selected = sorted(self.selectedPages)
 
         finalText = ''
@@ -404,37 +442,38 @@ class ExtractScreen(QWidget):
                 start = current
                 end = current
 
+        # add final range
         if start == end:
             result.append(f'{start+1}')
         else:
             result.append(f'{start+1}-{end+1}')
 
+        # create final text
         finalText = ','.join(result)
 
         
         self.pageInput.setText(finalText)
 
     def enableSelectMode(self):
+        # deselect all pages initially 
         self.deselectAllPages()
+        
+        # switch to select pages
         self.settingStack.setCurrentIndex(1)
 
+        # refresh card selection
         for card in self.pages:
             card.setSelected(card.pageIndex in self.selectedPages)
 
     def selectPages(self, text):
+        # if input is empty deselect every thing
         if not text.strip():
             self.selectedPages.clear()
 
-            for card in self.pages:
-                card.setSelected(False)
-
+            self.deselectAllPages()
             return
         
-        self.selectedPages.clear()
-
-
-        for card in self.pages:
-            card.setSelected(False)
+        newSelect = set()
         try:
             textList = text.split(',')
             for elem in textList:
@@ -443,64 +482,97 @@ class ExtractScreen(QWidget):
                     start, end = elem.split('-')
 
                     for i in range(int(start), int(end)+1):
-                        self.selectedPages.add(i-1)
+                        newSelect.add(i-1)
 
                 else:
-                    self.selectedPages.add(int(elem)-1)
-
-            for card in self.pages:
-                card.setSelected(card.pageIndex in self.selectedPages)
+                    newSelect.add(int(elem)-1)
+        # ignore invalid input
         except:
-            pass
+            return
+        
+        # calcule selection changes
+        toSelect = newSelect-self.selectedPages
+        toDeselect = self.selectedPages-newSelect
+
+        # save new selection
+        self.selectedPages = newSelect
+        
+        for card in self.pages:
+            if card.pageIndex in toSelect:
+                card.setSelected(True)
+            elif card.pageIndex in toDeselect:
+                card.setSelected(False)
+
+        # update info text
+        self.updateInfoText()
 
 
     def updateCurrentGrid(self, force=False):
+        # igonore if the pages exist
         if not self.pages:
             return
         
+        # get visible width of scroll area
         width = self.filePageFrame.viewport().width()
         cardWidth = 170
 
         collunms = max(1, width // cardWidth)
 
+        # skip rebuild if colluns dont change
         if collunms == self.currentCollumns and not force:
             return
         
         self.currentCollumns = collunms
 
+        # disable repaint update temporally
+        self.pagesFrame.setUpdatesEnabled(False)
+
+        # remove all widgets from layout
         while self.pageLayout.count():
             item = self.pageLayout.takeAt(0)
 
+        # reinsert card in positions
         for index, card in enumerate(self.pages):
             row = index // collunms
             col = index % collunms
             self.pageLayout.addWidget(card, row, col)
 
+        # re-enable repaint
+        self.pagesFrame.setUpdatesEnabled(True)
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
+
+        # add delay grid
         self.resizeTimer.start(100)
 
     def clearPages(self):
         for page in self.pages:
+            # remove all widget
             self.pageLayout.removeWidget(page)
             page.deleteLater()
         
+        # clear intenal page list
         self.pages.clear()
 
     def reoderCards(self, index, newIndex):
         oldIndex = -1
 
+        # find the draged card
         for i, card in enumerate(self.pages):
             if card.pageIndex == index:
                 oldIndex = i
                 break
 
+        # ignore invalid or identical index
         if oldIndex == newIndex or oldIndex == -1:
             return
         
+        # move the card in list
         reoderPage = self.pages.pop(oldIndex)
         self.pages.insert(newIndex, reoderPage)
 
+        # force the update grid
         self.updateCurrentGrid(force=True)
 
     def toggleSelectInfo(self, checked):
@@ -508,4 +580,17 @@ class ExtractScreen(QWidget):
             self.selectInfoContainer.hide()
         else:
             self.selectInfoContainer.show()
+
+    def updateInfoText(self):
+        total = len(self.selectedPages)
+
+        self.selectPageInfoText.setText(
+            f'ℹ️ Selected pages will be converted to separated PDF files. '
+            f'<b>{total} PDFs</b> will be created.'
+        )
+
+        self.allPagesInfoText.setText(
+            f'ℹ️ Selected pages will be converted to separated PDF files. '
+            f'<b>{total} PDFs</b> will be created.'
+        )
             

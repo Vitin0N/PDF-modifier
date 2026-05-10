@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QLabel, QSizePolicy, QApplication
 from PySide6.QtGui import QDrag, QFont
-from PySide6.QtCore import Qt, Signal, QMimeData, QTimer
+from PySide6.QtCore import Qt, Signal, QMimeData, QTimer, QPoint
 
 class PageCard(QFrame):
     clicked = Signal(int)
@@ -111,7 +111,6 @@ class PageCard(QFrame):
         drag.setMimeData(mimeData)
 
         
-
         drag.setPixmap(self.grab().scaled(
             100,
             120, 
@@ -119,7 +118,10 @@ class PageCard(QFrame):
             Qt.FastTransformation
             )
         )
-        drag.setHotSpot(event.pos())
+        centerX = self.grab().width() // 2
+        centerY = self.grab().height() // 2
+
+        drag.setHotSpot(QPoint(centerX, centerY))
         
         drag.exec()
 
