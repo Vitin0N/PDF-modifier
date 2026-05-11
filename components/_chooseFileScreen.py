@@ -34,6 +34,7 @@ class ChooseFileWidget(QWidget):
         subtitleLabel = QLabel(subtitle)
         subtitleLabel.setFont(subtitleFont)
         subtitleLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        subtitleLabel.setWordWrap(True)
 
         btnFont = QFont()
         btnFont.setPointSize(20)

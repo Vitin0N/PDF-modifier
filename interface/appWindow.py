@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 from ui.views.homeScreen import HomeView
 from ui.views.mergeScreen import MergeScreen
 from ui.views.extractScreen import ExtractScreen
+from ui.views.deleteScreen import DeleteScreen
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -47,11 +48,13 @@ class AppWindow(QMainWindow):
         self.homeScreen = HomeView()
         self.mergeScreen = MergeScreen()
         self.extractScreen = ExtractScreen()
+        self.deleteScreen = DeleteScreen()
 
         # Add screens to the stack
         self.stackWidget.addWidget(self.homeScreen)
         self.stackWidget.addWidget(self.mergeScreen)
         self.stackWidget.addWidget(self.extractScreen)
+        self.stackWidget.addWidget(self.deleteScreen)
 
         mainLayout.addWidget(self.sidebar)
         mainLayout.addWidget(self.stackWidget)
@@ -60,10 +63,12 @@ class AppWindow(QMainWindow):
         self.homeBtn.clicked.connect(self.showHomeScreen)
         self.mergeBtn.clicked.connect(self.showMergeScreen)
         self.extractBtn.clicked.connect(self.showExtractScreen)
+        self.deleteBtn.clicked.connect(self.showDeleteScreen)
 
         # Homescreen buttons listeners
         self.homeScreen.mergeClicked.connect(self.showMergeScreen)
         self.homeScreen.extractClicked.connect(self.showExtractScreen)
+        self.homeScreen.deleteClicked.connect(self.showDeleteScreen)
 
     # ==== Buttons Functions ====
     def showHomeScreen(self):
@@ -81,3 +86,10 @@ class AppWindow(QMainWindow):
         self.extractScreen.resetScreen()
         
         self.stackWidget.setCurrentIndex(2)
+
+    def showDeleteScreen(self):
+        print('Delete screen')
+        self.deleteScreen.resetScreen()
+
+        self.stackWidget.setCurrentIndex(3)
+

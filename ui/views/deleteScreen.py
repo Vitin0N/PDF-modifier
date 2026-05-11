@@ -10,10 +10,10 @@ from ui.widgets.loadingDialog import LoadingDialog
 from ui.layouts.dropPageGridFrame import DrogGridFrame
 from ui.widgets.pageCard import PageCard
 from core.worker.thumbWorker import ThumbWorker
-from core.worker.extractWorker import ExtractWorker
+# from core.worker.deleteWorker import deleteWorker
 
 
-class ExtractScreen(QWidget):
+class DeleteScreen(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -35,11 +35,11 @@ class ExtractScreen(QWidget):
 
         # choose file screen
         self.selectFileStep = ChooseFileWidget(
-            'Extract Pages from PDF',
-            'Separate one or a set of pages that can become one or more PDFs!'
+            'Delete Pages from PDF',
+            'Select and remove the PDF pages you don\'t need. And get a new file without the deleted pages.'
         )
 
-        self.selectFileStep.fileSelected.connect(self.continueToExtractScreen)
+        self.selectFileStep.fileSelected.connect(self.continueToeleteScreen)
 
         # setting and complete process screen
         self.settingStep = QWidget()
@@ -87,24 +87,24 @@ class ExtractScreen(QWidget):
         line.setFrameShape(QFrame.HLine)
         line.setFrameShadow(QFrame.Sunken)
 
-        # text style for extract button
-        extractBtnFont = QFont()
-        extractBtnFont.setPixelSize(30)
-        extractBtnFont.setBold(True)
+        # text style for delete button
+        deleteBtnFont = QFont()
+        deleteBtnFont.setPixelSize(30)
+        deleteBtnFont.setBold(True)
 
-        canExtractFont = QFont()
-        canExtractFont.setBold(True)
-        canExtractFont.setPixelSize(13)
+        candeleteFont = QFont()
+        candeleteFont.setBold(True)
+        candeleteFont.setPixelSize(13)
 
-        self.canExtractText = QLabel('You can only extract if there is more than one page selected file.')
-        self.canExtractText.setFont(canExtractFont)
-        self.canExtractText.setAlignment(Qt.AlignCenter)
-        self.canExtractText.setWordWrap(True)
-        self.canExtractText.hide()
+        self.candeleteText = QLabel('You can only delete if there is more than one page selected file.')
+        self.candeleteText.setFont(candeleteFont)
+        self.candeleteText.setAlignment(Qt.AlignCenter)
+        self.candeleteText.setWordWrap(True)
+        self.candeleteText.hide()
 
-        self.extractBtn = QPushButton("Extract Pages")
-        self.extractBtn.setFont(extractBtnFont)
-        self.extractBtn.setStyleSheet('''
+        self.deleteBtn = QPushButton("Delete Pages")
+        self.deleteBtn.setFont(deleteBtnFont)
+        self.deleteBtn.setStyleSheet('''
             QPushButton {
                 background-color: #e5322d;
                 color: white;
@@ -122,111 +122,23 @@ class ExtractScreen(QWidget):
                 color: #eeeeee;
             }                      
         ''')
-        self.extractBtn.setMinimumHeight(60)
-        self.extractBtn.clicked.connect(self.extractPages)
+        self.deleteBtn.setMinimumHeight(60)
+        self.deleteBtn.clicked.connect(self.deletePages)
 
         nameFont = QFont()
         nameFont.setPixelSize(30)
         nameFont.setBold(True)
 
-        name = QLabel('Extract Pages') 
+        name = QLabel('Delete Pages') 
         name.setFont(nameFont)
         name.setAlignment(Qt.AlignTop | Qt.AlignCenter)
 
-        # options tab
-        optionLabel = QLabel('Extract mode:')
-
-        optionTabLayout = QHBoxLayout()
-
-        self.allPagesBtn = QPushButton('Extract all pages')
-        self.allPagesBtn.setCheckable(True)
-        self.allPagesBtn.setCursor(Qt.PointingHandCursor)
-        self.allPagesBtn.setMinimumHeight(50)
-        self.allPagesBtn.setChecked(True)
-
-        self.allPagesBtn.clicked.connect(self.selectAllPages)
-
-        selectPageBtn = QPushButton('Select pages')
-        selectPageBtn.setCheckable(True)
-        selectPageBtn.setCursor(Qt.PointingHandCursor)
-        selectPageBtn.setMinimumHeight(50)
-
-        selectPageBtn.clicked.connect(self.enableSelectMode)
-
-        optionGroup = QButtonGroup(self)
-        optionGroup.setExclusive(True)
-        optionGroup.addButton(self.allPagesBtn)
-        optionGroup.addButton(selectPageBtn)
-
-        style = '''
-            QPushButton {
-                background-color: #2b2b2b;
-                color: white;
-                border: none;
-                border-radius: 10px;
-                padding: 10px;
-            }
-
-            QPushButton:hover {
-                border: 2px solid #e5322d;
-                color: #e5322d;
-            }
-
-            QPushButton:checked {
-                background-color: #e5322d;
-            }
-
-            QPushButton:checked:hover {
-                background-color: #C72B27;
-                color: white;
-                border: none;
-            }
-        '''
-
-        self.allPagesBtn.setStyleSheet(style)
-        selectPageBtn.setStyleSheet(style)
-
-        optionTabLayout.addWidget(self.allPagesBtn)
-        optionTabLayout.addWidget(selectPageBtn)
-
         # option info text
-        self.settingStack = QStackedWidget()
-
-        # ===== all pages box information =====
-        allPagesInfo = QWidget()
-        allPagesLayout = QVBoxLayout(allPagesInfo)
-
-        allPagesText = QLabel('Extract all pages:')
-        allPagesText.setWordWrap(True)
-
-        # all page info text
-        self.allPagesInfoContainer = QFrame()
-        allPagesInfoLayout = QVBoxLayout(self.allPagesInfoContainer)
-        self.allPagesInfoContainer.setStyleSheet('''
-            QFrame {
-                background-color: #def2ff;
-                border-radius: 10px;
-                padding: 0px 5px;
-            }
-        ''')
-
-        self.allPagesInfoText = QLabel()
-        self.allPagesInfoText.setWordWrap(True)
-        self.allPagesInfoText.setStyleSheet('color: black;')
-        self.allPagesInfoText.setAlignment(Qt.AlignCenter)
-
-        allPagesInfoLayout.addWidget(self.allPagesInfoText)
-        
-        allPagesLayout.addWidget(allPagesText)
-        allPagesLayout.addSpacing(30)
-        allPagesLayout.addWidget(self.allPagesInfoContainer)
-        allPagesLayout.addStretch()
-
         # ==== select pages box information =====
         selectPageInfo = QWidget()
         selectPageLayout = QVBoxLayout(selectPageInfo)
 
-        selectPageText = QLabel('Extract Mode:')
+        selectPageText = QLabel('delete Mode:')
         selectPageText.setWordWrap(True)
 
         # input for the selected pages
@@ -236,8 +148,8 @@ class ExtractScreen(QWidget):
 
         self.pageInput.textChanged.connect(self.selectPages)
 
-        # extract to one pdf chebok
-        self.extractToOne = QCheckBox('Merge extract pages into one PDF!')
+        # delete to one pdf chebok
+        self.deleteToOne = QCheckBox('Merge delete pages into one PDF!')
 
         # select page info text
         self.selectInfoContainer = QFrame()
@@ -257,38 +169,25 @@ class ExtractScreen(QWidget):
 
         selectInfoLayout.addWidget(self.selectPageInfoText)
 
-        self.extractToOne.toggled.connect(
+        self.deleteToOne.toggled.connect(
             self.toggleSelectInfo
         )
 
         selectPageLayout.addWidget(selectPageText)
         selectPageLayout.addWidget(self.pageInput)
-        selectPageLayout.addWidget(self.extractToOne)
+        selectPageLayout.addWidget(self.deleteToOne)
         selectPageLayout.addSpacing(10)
         selectPageLayout.addWidget(self.selectInfoContainer)
         selectPageLayout.addStretch()
-
-        self.settingStack.addWidget(allPagesInfo)
-        self.settingStack.addWidget(selectPageInfo)
-
-        self.allPagesBtn.clicked.connect(
-            lambda: self.settingStack.setCurrentIndex(0)
-        )
-        
-        selectPageBtn.clicked.connect(
-            lambda: self.settingStack.setCurrentIndex(1)
-        )
 
         # add elements in setting layout
         settingLayout.addWidget(name)
         settingLayout.addSpacing(10)
         settingLayout.addWidget(line)
-        settingLayout.addWidget(optionLabel)
-        settingLayout.addLayout(optionTabLayout)
-        settingLayout.addWidget(self.settingStack)
+        settingLayout.addWidget(selectPageInfo)
         settingLayout.addStretch()
-        settingLayout.addWidget(self.canExtractText)
-        settingLayout.addWidget(self.extractBtn)
+        settingLayout.addWidget(self.candeleteText)
+        settingLayout.addWidget(self.deleteBtn)
         settingLayout.addSpacing(20)
 
         # add the main and setting canva
@@ -313,20 +212,20 @@ class ExtractScreen(QWidget):
         # change stack to choose file screen
         self.innerStack.setCurrentIndex(0)
 
-    def continueToExtractScreen(self, filepath):
+    def continueToeleteScreen(self, filepath):
         # show loading overlay
         self.loading.showOverlay('', mode='spin')
 
-        # switch to extract screen
+        # switch to delete screen
         self.innerStack.setCurrentIndex(1)
 
-        # call the load extract screen
+        # call the load delete screen
         QTimer.singleShot(
             0,
-            lambda: self.loadExtractScreen(filepath)
+            lambda: self.loaddeleteScreen(filepath)
         )
 
-    def loadExtractScreen(self, filepath):
+    def loaddeleteScreen(self, filepath):
         # store the filepath
         self.selectFile = filepath
 
@@ -342,7 +241,6 @@ class ExtractScreen(QWidget):
 
         # hide loading overlay
         self.thumbWorker.finished.connect(self.loading.hideOverlay)
-        self.thumbWorker.finished.connect(self.selectAllPages)
 
         self.thumbWorker.start()
 
@@ -351,15 +249,15 @@ class ExtractScreen(QWidget):
         self.selectFile = ''
         self.filepath = ''
         self.selectedPages.clear()
+        self.updateInfoText()
         self.clearPages()
+        self.updatePageInput()
 
         # reset thumbWorker
         if hasattr(self, 'thumbWorker'):
             self.thumbWorker = None
 
         # restore default UI
-        self.allPagesBtn.setChecked(True)
-        self.settingStack.setCurrentIndex(0)
         self.innerStack.setCurrentIndex(0)
 
     def addPageCard(self, pageIndex, qimage):
@@ -382,10 +280,6 @@ class ExtractScreen(QWidget):
             self.updateCurrentGrid()
 
     def togglePageSelection(self, pageIndex):
-        # ignore click if the current screen is extract all
-        if self.settingStack.currentIndex() == 0:
-            return
-        
         # find clicked page card
         for page in self.pages:
             if page.pageIndex == pageIndex:
@@ -393,31 +287,18 @@ class ExtractScreen(QWidget):
                 # deselect page
                 if pageIndex in self.selectedPages:
                     self.selectedPages.remove(pageIndex)
-                    page.setSelected(False, 'extract')
+                    page.setSelected(False, 'delete')
 
                 # select page
                 else:
                     self.selectedPages.add(pageIndex)
-                    page.setSelected(True, 'extract')
+                    page.setSelected(True, 'delete')
 
                 break
 
         self.updatePageInput()
         self.updateInfoText()
-        self.setCanExtract()
-
-    def selectAllPages(self):
-        # clear previous selection
-        self.selectedPages.clear()
-
-        # select every page
-        for page in self.pages:
-            page.setSelected(True, 'extract')
-            self.selectedPages.add(page.pageIndex)
-
-        self.updatePageInput()
-        self.updateInfoText()
-        self.setCanExtract()
+        self.setCandelete()
 
     def deselectAllPages(self):
         # clear previous selection
@@ -425,11 +306,11 @@ class ExtractScreen(QWidget):
         
         # deselect every page
         for page in self.pages:
-            page.setSelected(False, 'extract')
+            page.setSelected(False, 'delete')
 
         self.updatePageInput()
         self.updateInfoText()
-        self.setCanExtract()
+        self.setCandelete()
 
     def updatePageInput(self):
         # clear input if nothing selected
@@ -474,9 +355,6 @@ class ExtractScreen(QWidget):
         # deselect all pages initially 
         self.deselectAllPages()
         
-        # switch to select pages
-        self.settingStack.setCurrentIndex(1)
-
         # refresh card selection
         for card in self.pages:
             card.setSelected(card.pageIndex in self.selectedPages, 'delete')
@@ -515,13 +393,14 @@ class ExtractScreen(QWidget):
         
         for card in self.pages:
             if card.pageIndex in toSelect:
-                card.setSelected(True, 'extract')
+                card.setSelected(True, 'delete')
             elif card.pageIndex in toDeselect:
-                card.setSelected(False, 'extract')
+                card.setSelected(False, 'delete')
 
         # update info text
         self.updateInfoText()
-        self.setCanExtract()
+        self.setCandelete()
+
 
     def updateCurrentGrid(self, force=False):
         # igonore if the pages exist
@@ -597,19 +476,18 @@ class ExtractScreen(QWidget):
         else:
             self.selectInfoContainer.show()
     
-    def setCanExtract(self):
+    def setCandelete(self):
         if len(self.selectedPages) == 0:
-            self.extractBtn.setCursor(Qt.ForbiddenCursor)
-            self.extractBtn.setProperty('blocked', True)
-            self.canExtractText.show()
+            self.deleteBtn.setCursor(Qt.ForbiddenCursor)
+            self.deleteBtn.setProperty('blocked', True)
+            self.candeleteText.show()
         else:
-            self.extractBtn.setCursor(Qt.PointingHandCursor)
-            self.extractBtn.setProperty('blocked', False)
-            self.canExtractText.hide()
+            self.deleteBtn.setCursor(Qt.PointingHandCursor)
+            self.deleteBtn.setProperty('blocked', False)
+            self.candeleteText.hide()
 
-        self.extractBtn.style().unpolish(self.extractBtn)
-        self.extractBtn.style().polish(self.extractBtn) 
-
+        self.deleteBtn.style().unpolish(self.deleteBtn)
+        self.deleteBtn.style().polish(self.deleteBtn) 
 
     def updateInfoText(self):
         total = len(self.selectedPages)
@@ -619,12 +497,7 @@ class ExtractScreen(QWidget):
             f'<b>{total} PDFs</b> will be created.'
         )
 
-        self.allPagesInfoText.setText(
-            f'ℹ️ Selected pages will be converted to separated PDF files. '
-            f'<b>{total} PDFs</b> will be created.'
-        )
-
-    def extractPages(self):
+    def deletePages(self):
         # set blur effect
         self.mainBlur = QGraphicsBlurEffect()
         self.mainBlur.setBlurRadius(8)
@@ -634,21 +507,21 @@ class ExtractScreen(QWidget):
         self.settingBlur.setBlurRadius(8)
         self.settingSide.setGraphicsEffect(self.settingBlur)
 
-        # TODO processing extract pages
-        self.loading.showOverlay('Extract Pages...', mode='progress')
-        self.worker = ExtractWorker(self.filepath, self.selectedPages)
+        # TODO processing delete pages
+        self.loading.showOverlay('Delete Pages...', mode='progress')
+        # self.worker = deleteWorker(self.filepath, self.selectedPages)
 
         self.worker.progress.connect(
             self.loading.updateProgress
         )
 
         self.worker.finished.connect(
-            self.finishExtract
+            self.finishdelete
         )
 
         self.worker.start()
 
-    def finishExtract(self):
+    def finishdelete(self):
             # remove blur effect
         self.mainSide.setGraphicsEffect(None)
         self.settingSide.setGraphicsEffect(None)
