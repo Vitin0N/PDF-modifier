@@ -354,7 +354,7 @@ class MergeScreen(QWidget):
             "merged.pdf",
             "PDF Files (*.pdf)"
         )
-        
+
         if not filepath:
             return
         
@@ -370,7 +370,6 @@ class MergeScreen(QWidget):
         self.settingBlur.setBlurRadius(8)
         self.settingSide.setGraphicsEffect(self.settingBlur)
 
-        # TODO processing merge PDF
         self.loadingProcess.showOverlay('Merging PDFs...', mode='progress')
 
         self.worker = MergeWorker(self.selectedFile, filepath)

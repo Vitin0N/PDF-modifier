@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
-    QGridLayout, QScrollArea, QGraphicsBlurEffect, QButtonGroup, QLineEdit, QCheckBox
+    QGridLayout, QScrollArea, QGraphicsBlurEffect, QButtonGroup, QLineEdit, QCheckBox,
+    QFileDialog
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont, QPixmap
@@ -625,6 +626,24 @@ class ExtractScreen(QWidget):
         )
 
     def extractPages(self):
+
+        if self.extractToOne.isChecked():
+            # get where the filepath will be saved 
+            output, _ = QFileDialog.getSaveFileName(
+                self,
+                "Salvar PDF Mesclado",
+                "extract.pdf",
+                "PDF Files (*.pdf)"
+            )
+
+            if not output:
+                return
+        else:
+            output = QFileDialog.getExistingDirectory(
+                self,
+                'Choose folder'
+            )
+
         # set blur effect
         self.mainBlur = QGraphicsBlurEffect()
         self.mainBlur.setBlurRadius(8)
@@ -636,7 +655,7 @@ class ExtractScreen(QWidget):
 
         # TODO processing extract pages
         self.loading.showOverlay('Extract Pages...', mode='progress')
-        self.worker = ExtractWorker(self.filepath, self.selectedPages)
+        self.worker = ExtractWorker(self.filepath, self.selectedPages, output, self.extractToOne.isChecked())
 
         self.worker.progress.connect(
             self.loading.updateProgress
