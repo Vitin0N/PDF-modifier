@@ -1,11 +1,10 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
-    QGridLayout, QScrollArea, QGraphicsBlurEffect
+    QGridLayout, QScrollArea, QGraphicsBlurEffect, QFileDialog
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 import os
-import time
 
 from ui.widgets.fileCard import FileCards
 from components._chooseFileScreen import ChooseFileWidget
@@ -348,6 +347,17 @@ class MergeScreen(QWidget):
         if not self.canMerge:
             return
         
+        # get where the filepath will be saved 
+        filepath, _ = QFileDialog.getSaveFileName(
+            self,
+            "Salvar PDF Mesclado",
+            "merged.pdf",
+            "PDF Files (*.pdf)"
+        )
+        
+        if not filepath:
+            return
+        
         # block the button on the processing
         self.changeMergeBtnState(True)
 
@@ -363,7 +373,7 @@ class MergeScreen(QWidget):
         # TODO processing merge PDF
         self.loadingProcess.showOverlay('Merging PDFs...', mode='progress')
 
-        self.worker = MergeWorker(self.selectedFile)
+        self.worker = MergeWorker(self.selectedFile, filepath)
 
         self.worker.progress.connect(
             self.loadingProcess.updateProgress
