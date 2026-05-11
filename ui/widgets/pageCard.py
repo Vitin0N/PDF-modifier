@@ -59,7 +59,7 @@ class PageCard(QFrame):
             }
         ''')
 
-        self.checkLabel = QLabel('✓', self)
+        self.checkLabel = QLabel(parent=self)
         self.checkLabel.setFixedSize(24, 24)
         self.checkLabel.setAlignment(Qt.AlignCenter)
         self.checkLabel.setStyleSheet('''
@@ -125,13 +125,35 @@ class PageCard(QFrame):
         
         drag.exec()
 
-    def setSelected(self, value):
+    def setSelected(self, value, method):
         self.selected = value
         self.checkLabel.setVisible(value)
-        self.updateStyle()
+        self.updateStyle(method)
 
-    def updateStyle(self):
-        borderColor = '#22c55e' if self.selected else 'transparent'
+    def updateStyle(self, method='extract'):
+        if method == 'extract':
+            self.checkLabel.setText('✓')
+            self.checkLabel.setStyleSheet('''
+            QLabel {
+                background-color: #22c55e;
+                color: white;
+                border-radius: 12px;
+                font-weight: bold;
+            }
+            ''')
+            borderColor = '#22c55e' if self.selected else 'transparent'
+        elif method == 'delete':
+            self.checkLabel.setText('✕')
+            self.checkLabel.setStyleSheet('''
+            QLabel {
+                background-color: #c50c0c;
+                color: white;
+                border-radius: 12px;
+                font-weight: bold;
+            }
+            ''')
+            borderColor = "#c50c0c" if self.selected else 'transparent'
+
 
         self.setStyleSheet(f'''
         QFrame {{

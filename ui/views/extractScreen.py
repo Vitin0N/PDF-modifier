@@ -393,12 +393,12 @@ class ExtractScreen(QWidget):
                 # deselect page
                 if pageIndex in self.selectedPages:
                     self.selectedPages.remove(pageIndex)
-                    page.setSelected(False)
+                    page.setSelected(False, 'delete')
 
                 # select page
                 else:
                     self.selectedPages.add(pageIndex)
-                    page.setSelected(True)
+                    page.setSelected(True, 'delete')
 
                 break
 
@@ -412,7 +412,7 @@ class ExtractScreen(QWidget):
 
         # select every page
         for page in self.pages:
-            page.setSelected(True)
+            page.setSelected(True, 'delete')
             self.selectedPages.add(page.pageIndex)
 
         self.updatePageInput()
@@ -425,7 +425,7 @@ class ExtractScreen(QWidget):
         
         # deselect every page
         for page in self.pages:
-            page.setSelected(False)
+            page.setSelected(False, 'delete')
 
         self.updatePageInput()
         self.updateInfoText()
@@ -479,7 +479,7 @@ class ExtractScreen(QWidget):
 
         # refresh card selection
         for card in self.pages:
-            card.setSelected(card.pageIndex in self.selectedPages)
+            card.setSelected(card.pageIndex in self.selectedPages, 'delete')
 
     def selectPages(self, text):
         # if input is empty deselect every thing
@@ -515,9 +515,9 @@ class ExtractScreen(QWidget):
         
         for card in self.pages:
             if card.pageIndex in toSelect:
-                card.setSelected(True)
+                card.setSelected(True, 'delete')
             elif card.pageIndex in toDeselect:
-                card.setSelected(False)
+                card.setSelected(False, 'delete')
 
         # update info text
         self.updateInfoText()
