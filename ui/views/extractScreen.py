@@ -653,9 +653,13 @@ class ExtractScreen(QWidget):
         self.settingBlur.setBlurRadius(8)
         self.settingSide.setGraphicsEffect(self.settingBlur)
 
-        # TODO processing extract pages
         self.loading.showOverlay('Extract Pages...', mode='progress')
-        self.worker = ExtractWorker(self.filepath, self.selectedPages, output, self.extractToOne.isChecked())
+        self.worker = ExtractWorker(
+            file=self.filepath, 
+            pages=self.selectedPages, 
+            output=output, 
+            mode=self.extractToOne.isChecked()
+        )
 
         self.worker.progress.connect(
             self.loading.updateProgress

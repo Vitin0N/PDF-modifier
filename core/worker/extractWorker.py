@@ -23,6 +23,7 @@ class ExtractWorker(QThread):
 
         reader = pypdf.PdfReader(self.file)
 
+        # if resquested to create only a single file
         if self.modeExtractToOne:
             writer = pypdf.PdfWriter()
             for index, pageIndex in enumerate(self.pages):
@@ -39,6 +40,7 @@ class ExtractWorker(QThread):
             with open(self.output, 'wb') as output:
                 writer.write(output)
 
+        # resquested to create multiple one-page PDFs
         else:
             originalPath = Path(self.file)
 

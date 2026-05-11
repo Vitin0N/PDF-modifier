@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
-    QGridLayout, QScrollArea, QGraphicsBlurEffect, QButtonGroup, QLineEdit, QCheckBox
+    QGridLayout, QScrollArea, QGraphicsBlurEffect, QLineEdit,QFileDialog   
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont, QPixmap
@@ -10,7 +10,7 @@ from ui.widgets.loadingDialog import LoadingDialog
 from ui.layouts.dropPageGridFrame import DrogGridFrame
 from ui.widgets.pageCard import PageCard
 from core.worker.thumbWorker import ThumbWorker
-# from core.worker.deleteWorker import deleteWorker
+from core.worker.deleteWorker import DeleteWorker
 
 
 class DeleteScreen(QWidget):
@@ -148,9 +148,6 @@ class DeleteScreen(QWidget):
 
         self.pageInput.textChanged.connect(self.selectPages)
 
-        # delete to one pdf chebok
-        self.deleteToOne = QCheckBox('Merge delete pages into one PDF!')
-
         # select page info text
         self.selectInfoContainer = QFrame()
         selectInfoLayout = QVBoxLayout(self.selectInfoContainer)
@@ -169,13 +166,8 @@ class DeleteScreen(QWidget):
 
         selectInfoLayout.addWidget(self.selectPageInfoText)
 
-        self.deleteToOne.toggled.connect(
-            self.toggleSelectInfo
-        )
-
         selectPageLayout.addWidget(selectPageText)
         selectPageLayout.addWidget(self.pageInput)
-        selectPageLayout.addWidget(self.deleteToOne)
         selectPageLayout.addSpacing(10)
         selectPageLayout.addWidget(self.selectInfoContainer)
         selectPageLayout.addStretch()
@@ -498,6 +490,16 @@ class DeleteScreen(QWidget):
         )
 
     def deletePages(self):
+        output, _ = QFileDialog.getSaveFileName(
+            self,
+            "Salvar PDF Mesclado",
+            "extract.pdf",
+            "PDF Files (*.pdf)"
+        )
+
+        if not output:
+            return
+
         # set blur effect
         self.mainBlur = QGraphicsBlurEffect()
         self.mainBlur.setBlurRadius(8)
@@ -506,10 +508,9 @@ class DeleteScreen(QWidget):
         self.settingBlur = QGraphicsBlurEffect()
         self.settingBlur.setBlurRadius(8)
         self.settingSide.setGraphicsEffect(self.settingBlur)
-
-        # TODO processing delete pages
+        
         self.loading.showOverlay('Delete Pages...', mode='progress')
-        # self.worker = deleteWorker(self.filepath, self.selectedPages)
+        self.worker = DeleteWorker(self.filepath, self.selectedPages, output)
 
         self.worker.progress.connect(
             self.loading.updateProgress
