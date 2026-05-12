@@ -70,25 +70,26 @@ class AppWindow(QMainWindow):
         self.homeScreen.extractClicked.connect(self.showExtractScreen)
         self.homeScreen.deleteClicked.connect(self.showDeleteScreen)
 
+        # Merge Screen buttons listeners
+        self.mergeScreen.returnToHome.connect(self.showHomeScreen)
+        self.extractScreen.returnToHome.connect(self.showHomeScreen)
+        self.deleteScreen.returnToHome.connect(self.showHomeScreen)
+
     # ==== Buttons Functions ====
     def showHomeScreen(self):
-        print('home screen')
         self.stackWidget.setCurrentIndex(0)
 
     def showMergeScreen(self):
-        print('merge srcreen')
         self.mergeScreen.resetScreen()
         
         self.stackWidget.setCurrentIndex(1)
     
     def showExtractScreen(self):
-        print("Extract Screen")
         self.extractScreen.resetScreen()
         
         self.stackWidget.setCurrentIndex(2)
 
     def showDeleteScreen(self):
-        print('Delete screen')
         self.deleteScreen.resetScreen()
 
         self.stackWidget.setCurrentIndex(3)

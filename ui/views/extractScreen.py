@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QGridLayout, QScrollArea, QGraphicsBlurEffect, QButtonGroup, QLineEdit, QCheckBox,
     QFileDialog
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QFont, QPixmap
 
 from components._chooseFileScreen import ChooseFileWidget
@@ -12,9 +12,11 @@ from ui.layouts.dropPageGridFrame import DrogGridFrame
 from ui.widgets.pageCard import PageCard
 from core.worker.thumbWorker import ThumbWorker
 from core.worker.extractWorker import ExtractWorker
-
+from components.successScreen import SuccessScreen
 
 class ExtractScreen(QWidget):
+    returnToHome = Signal()
+    
     def __init__(self):
         super().__init__()
 
@@ -45,6 +47,9 @@ class ExtractScreen(QWidget):
         # setting and complete process screen
         self.settingStep = QWidget()
         mainSettingLayout = QHBoxLayout(self.settingStep)
+
+        # Success Screen Step
+        self.successScreen = SuccessScreen("Extract")
 
         # loading for setting Step
         self.loading = LoadingDialog(self.settingStep)
@@ -299,6 +304,10 @@ class ExtractScreen(QWidget):
         # add screen to stack
         self.innerStack.addWidget(self.selectFileStep)
         self.innerStack.addWidget(self.settingStep)
+        self.innerStack.addWidget(self.successScreen)
+
+        self.successScreen.gotoHomeScreen.connect(self.handleGoHome)
+
 
     # ===== Funtions =====
     def backToChooseFileScreen(self):
@@ -682,3 +691,8 @@ class ExtractScreen(QWidget):
         self.loading.hideOverlay()
 
         self.resetScreen()
+
+        self.innerStack.setCurrentIndex(2)
+
+    def handleGoHome(self):
+        self.returnToHome.emit()

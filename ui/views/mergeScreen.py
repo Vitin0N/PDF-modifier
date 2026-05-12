@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
     QGridLayout, QScrollArea, QGraphicsBlurEffect, QFileDialog
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QFont
 import os
 
@@ -12,8 +12,11 @@ from core.chooseFileDialog import chooseFile
 from ui.widgets.loadingDialog import LoadingDialog
 from core.worker.mergeWorker import MergeWorker
 from ui.layouts.dropFileGridFrame import DrogGridFrame
+from components.successScreen import SuccessScreen
 
 class MergeScreen(QWidget):
+    returnToHome = Signal()
+    
     def __init__(self):
         super().__init__()
 
@@ -33,6 +36,9 @@ class MergeScreen(QWidget):
         # setting and complete process screen
         self.settingStep = QWidget()
         mainSettingLayout = QHBoxLayout(self.settingStep)
+
+        # success step
+        self.successScreen = SuccessScreen("Merge")
 
         # loading setting
         self.loadingProcess = LoadingDialog(self.settingStep)
@@ -187,6 +193,7 @@ class MergeScreen(QWidget):
         # add screen to stack
         self.innerStack.addWidget(self.selectFileStep)
         self.innerStack.addWidget(self.settingStep)
+        self.innerStack.addWidget(self.successScreen)
 
         # save the selected files on this var
         self.selectedFile = []
@@ -195,6 +202,7 @@ class MergeScreen(QWidget):
         self.backBtn.clicked.connect(self.backChoosingFile)
         self.addFilesBtn.clicked.connect(self.addFiles)
         self.mergeBtn.clicked.connect(self.mergePdfs)
+        self.successScreen.gotoHomeScreen.connect(self.handleGoHome)
 
     # screen functions
     def continueToMergeScreen(self, filepaths):
@@ -389,12 +397,15 @@ class MergeScreen(QWidget):
         # remove blur effect
         self.mainSide.setGraphicsEffect(None)
         self.settingSide.setGraphicsEffect(None)
-
         self.loadingProcess.progressBar.setValue(0)
-
         self.loadingProcess.hideOverlay()
 
         self.changeMergeBtnState(False)
 
         self.resetScreen()
+
+        self.innerStack.setCurrentIndex(2)
+
+    def handleGoHome(self):
+        self.returnToHome.emit()
         

@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QStackedWidget, QFrame, QHBoxLayout,
     QGridLayout, QScrollArea, QGraphicsBlurEffect, QLineEdit,QFileDialog   
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QFont, QPixmap
 
 from components._chooseFileScreen import ChooseFileWidget
@@ -11,9 +11,11 @@ from ui.layouts.dropPageGridFrame import DrogGridFrame
 from ui.widgets.pageCard import PageCard
 from core.worker.thumbWorker import ThumbWorker
 from core.worker.deleteWorker import DeleteWorker
-
+from components.successScreen import SuccessScreen
 
 class DeleteScreen(QWidget):
+    returnToHome = Signal()
+    
     def __init__(self):
         super().__init__()
 
@@ -44,6 +46,10 @@ class DeleteScreen(QWidget):
         # setting and complete process screen
         self.settingStep = QWidget()
         mainSettingLayout = QHBoxLayout(self.settingStep)
+
+        # Success Screen step
+        self.successScreen = SuccessScreen("Delete")
+
 
         # loading for setting Step
         self.loading = LoadingDialog(self.settingStep)
@@ -189,6 +195,10 @@ class DeleteScreen(QWidget):
         # add screen to stack
         self.innerStack.addWidget(self.selectFileStep)
         self.innerStack.addWidget(self.settingStep)
+        self.innerStack.addWidget(self.successScreen)
+
+        self.successScreen.gotoHomeScreen.connect(self.handleGoHome)
+
 
     # ===== Funtions =====
     def backToChooseFileScreen(self):
@@ -537,3 +547,8 @@ class DeleteScreen(QWidget):
         self.loading.hideOverlay()
 
         self.resetScreen()
+
+        self.innerStack.setCurrentIndex(2)
+
+    def handleGoHome(self):
+        self.returnToHome.emit()
