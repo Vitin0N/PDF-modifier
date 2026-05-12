@@ -37,21 +37,21 @@ class HomeView(QWidget):
 
         # creating process buttons
         mergeBtn = QPushButton("Merge")
-        splitBtn = QPushButton("Split")
+        # splitBtn = QPushButton("Split")
         extractBtn = QPushButton("Extract")
         deleteBtn = QPushButton("Delete")
 
         mergeBtn.clicked.connect(self.mergeClicked.emit)
-        splitBtn.clicked.connect(self.splitClicked.emit)
+        # splitBtn.clicked.connect(self.splitClicked.emit)
         extractBtn.clicked.connect(self.extractClicked.emit)
         deleteBtn.clicked.connect(self.deleteClicked.emit)
 
-        for btn in [mergeBtn, splitBtn, deleteBtn, extractBtn]:
+        for btn in [mergeBtn, deleteBtn, extractBtn]:
             btn.setStyleSheet("padding: 10px; min-width: 80px")
 
         # add buttons in the button layout
         buttonLayout.addWidget(mergeBtn)
-        buttonLayout.addWidget(splitBtn)
+        # buttonLayout.addWidget(splitBtn)
         buttonLayout.addWidget(extractBtn)
         buttonLayout.addWidget(deleteBtn)
 

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
-    QPushButton, QStackedWidget, QLabel
+    QPushButton, QStackedWidget
 )
 
 from ui.views.homeScreen import HomeView
@@ -29,14 +29,14 @@ class AppWindow(QMainWindow):
         # Routes buttons
         self.homeBtn = QPushButton('Home')
         self.mergeBtn = QPushButton('Merge PDFs')
-        self.splitBtn = QPushButton('Split PDFs')
+        # self.splitBtn = QPushButton('Split PDFs')
         self.extractBtn = QPushButton('Extract Pages')
         self.deleteBtn = QPushButton('Delete Pages')
 
         menuLayout.addWidget(self.homeBtn)
         menuLayout.addSpacing(50)
         menuLayout.addWidget(self.mergeBtn)
-        menuLayout.addWidget(self.splitBtn)
+        # menuLayout.addWidget(self.splitBtn)
         menuLayout.addWidget(self.extractBtn)
         menuLayout.addWidget(self.deleteBtn)
         menuLayout.addStretch()
