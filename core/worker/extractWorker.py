@@ -7,15 +7,16 @@ class ExtractWorker(QThread):
     progress = Signal(int)
     finished = Signal()
 
-    def __init__(self, file, pages, output, mode):
+    def __init__(self, file, selectedPages, reoderPages, output, mode):
         super().__init__()
         self.file = file
-        self.pages = pages
+        self.selectedPages = selectedPages
+        self.pages = reoderPages
         self.output = output
         self.modeExtractToOne = mode
 
     def run(self):
-        total = len(self.pages)
+        total = len(self.selectedPages)
         
         if not total:
             self.finished.emit()
@@ -27,10 +28,11 @@ class ExtractWorker(QThread):
         if self.modeExtractToOne:
             writer = pypdf.PdfWriter()
             for index, pageIndex in enumerate(self.pages):
-                try:
-                    writer.add_page(reader.pages[pageIndex])
-                except Exception as e:
-                    print(e)
+                if pageIndex in self.selectedPages:
+                    try:
+                        writer.add_page(reader.pages[pageIndex])
+                    except Exception as e:
+                        print(e)
                     
                 percent = int(((index + 1) / total) * 90)
 
@@ -48,7 +50,7 @@ class ExtractWorker(QThread):
 
             basename = originalPath.stem
 
-            for index, pageIndex in enumerate(self.pages):
+            for index, pageIndex in enumerate(self.selectedPages):
                 writer = pypdf.PdfWriter()
                 writer.add_page(reader.pages[pageIndex])
                 try:

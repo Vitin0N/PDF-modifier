@@ -6,14 +6,15 @@ class DeleteWorker(QThread):
     progress = Signal(int)
     finished = Signal()
 
-    def __init__(self, file, pages, output):
+    def __init__(self, file, selectedPages, reorderedPages, output):
         super().__init__()
         self.file = file
-        self.pages = pages
+        self.pages = reorderedPages
+        self.selectedPages = selectedPages
         self.output = output
 
     def run(self):
-        total = len(self.pages)
+        total = len(self.selectedPages)
         
         if not total:
             self.finished.emit()
@@ -22,9 +23,9 @@ class DeleteWorker(QThread):
         reader = pypdf.PdfReader(self.file)
         writer = pypdf.PdfWriter()
 
-        for index, _ in enumerate(reader.pages):
+        for index, _ in enumerate(self.pages):
             try:
-                if index not in self.pages:
+                if index not in self.selectedPages:
                     writer.add_page(reader.pages[index])
             except Exception as e:
                 print(e)

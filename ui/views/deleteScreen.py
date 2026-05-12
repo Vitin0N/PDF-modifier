@@ -290,7 +290,7 @@ class DeleteScreen(QWidget):
 
         self.updatePageInput()
         self.updateInfoText()
-        self.setCandelete()
+        self.setCanDelete()
 
     def deselectAllPages(self):
         # clear previous selection
@@ -302,7 +302,7 @@ class DeleteScreen(QWidget):
 
         self.updatePageInput()
         self.updateInfoText()
-        self.setCandelete()
+        self.setCanDelete()
 
     def updatePageInput(self):
         # clear input if nothing selected
@@ -391,7 +391,7 @@ class DeleteScreen(QWidget):
 
         # update info text
         self.updateInfoText()
-        self.setCandelete()
+        self.setCanDelete()
 
 
     def updateCurrentGrid(self, force=False):
@@ -468,7 +468,7 @@ class DeleteScreen(QWidget):
         else:
             self.selectInfoContainer.show()
     
-    def setCandelete(self):
+    def setCanDelete(self):
         if len(self.selectedPages) == 0:
             self.deleteBtn.setCursor(Qt.ForbiddenCursor)
             self.deleteBtn.setProperty('blocked', True)
@@ -493,7 +493,7 @@ class DeleteScreen(QWidget):
         output, _ = QFileDialog.getSaveFileName(
             self,
             "Salvar PDF Mesclado",
-            "extract.pdf",
+            "deleted.pdf",
             "PDF Files (*.pdf)"
         )
 
@@ -510,7 +510,12 @@ class DeleteScreen(QWidget):
         self.settingSide.setGraphicsEffect(self.settingBlur)
         
         self.loading.showOverlay('Delete Pages...', mode='progress')
-        self.worker = DeleteWorker(self.filepath, self.selectedPages, output)
+        self.worker = DeleteWorker(
+            file=self.filepath, 
+            selectedPages=self.selectedPages,
+            reorderedPages=self.pages,
+            output=output
+        )
 
         self.worker.progress.connect(
             self.loading.updateProgress
@@ -530,7 +535,5 @@ class DeleteScreen(QWidget):
         self.loading.progressBar.setValue(0)
 
         self.loading.hideOverlay()
-
-        print('Terminou')
 
         self.resetScreen()

@@ -396,7 +396,5 @@ class MergeScreen(QWidget):
 
         self.changeMergeBtnState(False)
 
-        print('Terminou')
-
         self.resetScreen()
         

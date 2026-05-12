@@ -656,7 +656,8 @@ class ExtractScreen(QWidget):
         self.loading.showOverlay('Extract Pages...', mode='progress')
         self.worker = ExtractWorker(
             file=self.filepath, 
-            pages=self.selectedPages, 
+            selectedPages=self.selectedPages, 
+            reoderPages=self.pages,
             output=output, 
             mode=self.extractToOne.isChecked()
         )
@@ -679,7 +680,5 @@ class ExtractScreen(QWidget):
         self.loading.progressBar.setValue(0)
 
         self.loading.hideOverlay()
-
-        print('Terminou')
 
         self.resetScreen()
