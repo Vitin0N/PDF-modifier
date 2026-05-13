@@ -11,6 +11,8 @@ from ui.views.deleteScreen import DeleteScreen
 class AppWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.sidebarCompress = False
+
         self.setWindowTitle('PDF Modifier')
         self.resize(800, 600)
 
@@ -20,19 +22,52 @@ class AppWindow(QMainWindow):
         mainLayout = QHBoxLayout(centralWidget)
 
         # Sidebar configuration
-        self.sidebar = QWidget()    
-        self.sidebar.setFixedWidth(200)
+        self.sidebarExpandedWidth = 200
+        self.sidebarCollapsedWidth = 90
+
+        self.sidebar = QWidget()
+        self.sidebar.setFixedWidth(self.sidebarExpandedWidth)
 
         menuLayout = QVBoxLayout(self.sidebar)
-        menuLayout.setContentsMargins(0, 10, 0, 0)
+        menuLayout.setContentsMargins(5, 10, 5, 10)
 
-        # Routes buttons
-        self.homeBtn = QPushButton('Home')
-        self.mergeBtn = QPushButton('Merge PDFs')
-        # self.splitBtn = QPushButton('Split PDFs')
-        self.extractBtn = QPushButton('Extract Pages')
-        self.deleteBtn = QPushButton('Delete Pages')
+        # ===== Top bar in menu Layout =====
+        topLayout = QHBoxLayout()
+        topLayout.addStretch()
 
+        self.compressSidebarBtn = QPushButton("⇚")
+        self.compressSidebarBtn.setFixedSize(32, 32)
+
+        self.compressSidebarBtn.setStyleSheet("""
+            QPushButton {
+                background-color: #e5322d;
+                color: white;
+                border: none;
+                border-radius: 16px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            QPushButton:hover {
+                background-color: #C42B27;
+            }
+        """)
+        self.compressSidebarBtn.clicked.connect(self.compressSideBar)
+
+        topLayout.addWidget(self.compressSidebarBtn)
+
+
+        # ===== Route buttons =====
+        self.homeBtn = QPushButton()
+        self.mergeBtn = QPushButton()
+        # self.splitBtn = QPushButton()
+        self.extractBtn = QPushButton()
+        self.deleteBtn = QPushButton()
+
+        self.setRoutesBtnText()
+
+        menuLayout.addLayout(topLayout)
+        menuLayout.addSpacing(20)
         menuLayout.addWidget(self.homeBtn)
         menuLayout.addSpacing(50)
         menuLayout.addWidget(self.mergeBtn)
@@ -77,16 +112,22 @@ class AppWindow(QMainWindow):
 
     # ==== Buttons Functions ====
     def showHomeScreen(self):
+        self.sidebar.setMinimumWidth(200)
+        self.sidebar.setMaximumWidth(200)
+
         self.stackWidget.setCurrentIndex(0)
 
     def showMergeScreen(self):
         self.mergeScreen.resetScreen()
+        self.compressSideBar(forceCompress=True)
+
         
         self.stackWidget.setCurrentIndex(1)
     
     def showExtractScreen(self):
         self.extractScreen.resetScreen()
-        
+        self.compressSideBar(forceCompress=True)
+
         self.stackWidget.setCurrentIndex(2)
 
     def showDeleteScreen(self):
@@ -94,3 +135,34 @@ class AppWindow(QMainWindow):
 
         self.stackWidget.setCurrentIndex(3)
 
+
+    def compressSideBar(self, forceCompress=False):
+
+        if self.sidebarCompress and not forceCompress:
+            self.sidebarCompress = False
+            self.setRoutesBtnText()
+
+            self.sidebar.setFixedWidth(self.sidebarExpandedWidth)
+            self.compressSidebarBtn.setText("⇚")
+
+        elif not self.sidebarCompress:
+            self.sidebarCompress = True
+            self.setRoutesBtnText()
+
+            self.sidebar.setFixedWidth(self.sidebarCollapsedWidth)
+            self.compressSidebarBtn.setText("⇛")
+
+    def setRoutesBtnText(self):
+        if not self.sidebarCompress:
+            self.homeBtn.setText('Home')
+            self.mergeBtn.setText('Merge PDFs')
+            # self.splitBtn.setText('Split PDFs')
+            self.extractBtn.setText('Extract Pages')
+            self.deleteBtn.setText('Delete Pages')
+        else:
+            self.homeBtn.setText('Home')
+            self.mergeBtn.setText('Merge')
+            # self.splitBtn.setText('Split PDFs')
+            self.extractBtn.setText('Extract')
+            self.deleteBtn.setText('Delete')
+        

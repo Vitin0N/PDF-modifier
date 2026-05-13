@@ -244,6 +244,7 @@ class ExtractScreen(QWidget):
 
         # extract to one pdf chebok
         self.extractToOne = QCheckBox('Merge extract pages into one PDF!')
+        self.extractToOne.setChecked(True)
 
         # select page info text
         self.selectInfoContainer = QFrame()
@@ -255,6 +256,7 @@ class ExtractScreen(QWidget):
                 padding: 0px 5px;
             }
         ''')
+        self.selectInfoContainer.hide()
 
         self.selectPageInfoText = QLabel()
         self.selectPageInfoText.setWordWrap(True)
@@ -282,7 +284,7 @@ class ExtractScreen(QWidget):
         )
         
         selectPageBtn.clicked.connect(
-            lambda: self.settingStack.setCurrentIndex(1)
+            self.selectedButtonClicked
         )
 
         # add elements in setting layout
@@ -371,6 +373,12 @@ class ExtractScreen(QWidget):
         self.allPagesBtn.setChecked(True)
         self.settingStack.setCurrentIndex(0)
         self.innerStack.setCurrentIndex(0)
+
+    def selectedButtonClicked(self):
+        self.extractToOne.setChecked(True)
+        self.selectInfoContainer.hide()
+
+        self.settingStack.setCurrentIndex(1)
 
     def addPageCard(self, pageIndex, qimage):
         pixmap = QPixmap.fromImage(qimage)
@@ -636,7 +644,7 @@ class ExtractScreen(QWidget):
 
     def extractPages(self):
 
-        if self.extractToOne.isChecked():
+        if self.extractToOne.isChecked() and self.settingStack.currentIndex() != 0:
             # get where the filepath will be saved 
             output, _ = QFileDialog.getSaveFileName(
                 self,
@@ -645,6 +653,7 @@ class ExtractScreen(QWidget):
                 "PDF Files (*.pdf)"
             )
 
+
             if not output:
                 return
         else:
@@ -652,6 +661,10 @@ class ExtractScreen(QWidget):
                 self,
                 'Choose folder'
             )
+            self.extractToOne.setChecked(False)
+
+            if not output:
+                return
 
         # set blur effect
         self.mainBlur = QGraphicsBlurEffect()
