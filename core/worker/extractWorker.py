@@ -27,14 +27,17 @@ class ExtractWorker(QThread):
         # if resquested to create only a single file
         if self.modeExtractToOne:
             writer = pypdf.PdfWriter()
-            for index, pageIndex in enumerate(self.pages):
-                if pageIndex in self.selectedPages:
+            processed = 0
+
+            for page in self.pages:
+                if page.pageIndex in self.selectedPages:
                     try:
-                        writer.add_page(reader.pages[pageIndex])
+                        writer.add_page(reader.pages[page.pageIndex])
                     except Exception as e:
                         print(e)
                     
-                percent = int(((index + 1) / total) * 90)
+                processed += 1
+                percent = int(((processed + 1) / total) * 90)
 
                 self.progress.emit(percent)
 

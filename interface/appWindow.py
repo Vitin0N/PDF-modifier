@@ -2,11 +2,14 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
     QPushButton, QStackedWidget
 )
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 
 from ui.views.homeScreen import HomeView
 from ui.views.mergeScreen import MergeScreen
 from ui.views.extractScreen import ExtractScreen
 from ui.views.deleteScreen import DeleteScreen
+from core.currentPath import resourcePath
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -15,6 +18,10 @@ class AppWindow(QMainWindow):
 
         self.setWindowTitle('PDF Modifier')
         self.resize(800, 600)
+
+        iconFilepath = resourcePath("assets/icon.ico")
+        self.setWindowIcon(QIcon(iconFilepath))
+
 
         centralWidget = QWidget()
         self.setCentralWidget(centralWidget)
@@ -35,10 +42,10 @@ class AppWindow(QMainWindow):
         topLayout = QHBoxLayout()
         topLayout.addStretch()
 
-        self.compressSidebarBtn = QPushButton("⇚")
-        self.compressSidebarBtn.setFixedSize(32, 32)
+        self.collapseSidebarBtn = QPushButton("⇚")
+        self.collapseSidebarBtn.setFixedSize(32, 32)
 
-        self.compressSidebarBtn.setStyleSheet("""
+        self.collapseSidebarBtn.setStyleSheet("""
             QPushButton {
                 background-color: #e5322d;
                 color: white;
@@ -52,9 +59,10 @@ class AppWindow(QMainWindow):
                 background-color: #C42B27;
             }
         """)
-        self.compressSidebarBtn.clicked.connect(self.compressSideBar)
-
-        topLayout.addWidget(self.compressSidebarBtn)
+        
+        self.collapseSidebarBtn.clicked.connect(self.collapseSidebar)
+        self.collapseSidebarBtn.setCursor(Qt.PointingHandCursor)
+        topLayout.addWidget(self.collapseSidebarBtn)
 
 
         # ===== Route buttons =====
@@ -115,46 +123,41 @@ class AppWindow(QMainWindow):
         self.sidebar.setMinimumWidth(200)
         self.sidebar.setMaximumWidth(200)
 
+        # Set the sidebar button icon and initialize the sidebar as expanded
+        self.sidebarCompress = False
         self.stackWidget.setCurrentIndex(0)
 
     def showMergeScreen(self):
-        self.mergeScreen.resetScreen()
-        self.compressSideBar(forceCompress=True)
-
-        
+        self.mergeScreen.resetScreen()        
         self.stackWidget.setCurrentIndex(1)
     
     def showExtractScreen(self):
         self.extractScreen.resetScreen()
-        self.compressSideBar(forceCompress=True)
-
         self.stackWidget.setCurrentIndex(2)
 
     def showDeleteScreen(self):
         self.deleteScreen.resetScreen()
-
         self.stackWidget.setCurrentIndex(3)
 
 
-    def compressSideBar(self, forceCompress=False):
-
-        if self.sidebarCompress and not forceCompress:
+    def collapseSidebar(self):
+        if self.sidebarCompress:
             self.sidebarCompress = False
             self.setRoutesBtnText()
 
             self.sidebar.setFixedWidth(self.sidebarExpandedWidth)
-            self.compressSidebarBtn.setText("⇚")
+            self.collapseSidebarBtn.setText("⇚")
 
         elif not self.sidebarCompress:
             self.sidebarCompress = True
             self.setRoutesBtnText()
 
             self.sidebar.setFixedWidth(self.sidebarCollapsedWidth)
-            self.compressSidebarBtn.setText("⇛")
+            self.collapseSidebarBtn.setText("⇛")
 
     def setRoutesBtnText(self):
         if not self.sidebarCompress:
-            self.homeBtn.setText('Home')
+            self.homeBtn.setText('Home Screen')
             self.mergeBtn.setText('Merge PDFs')
             # self.splitBtn.setText('Split PDFs')
             self.extractBtn.setText('Extract Pages')
