@@ -6,6 +6,6 @@ test/
 
 build/
 
-*.spec
-
 dist/  
+
+releases/
